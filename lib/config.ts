@@ -85,7 +85,17 @@ export const CAMERAS: Camera[] = [
     grade: "none",
     ir: true,
   },
-  { id: 4, label: "CAM 04", zone: "Tótem de Seguridad", scene: "totem", image: "/cams/cam4.jpg" },
+  {
+    id: 4,
+    label: "CAM 04",
+    zone: "Tótem de Seguridad",
+    scene: "totem",
+    // Pre-cableada: apenas exista cam4.mp4 se usa sola, sin tocar nada.
+    // Mientras no esté, cae en la escena vectorial del tótem.
+    video: "/cams/cam4.mp4",
+    grade: "none",
+    zoom: 1.22,
+  },
 ];
 
 /** La cámara donde ocurre el evento */
