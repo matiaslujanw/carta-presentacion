@@ -48,13 +48,15 @@ export type Camera = {
    *  "ir"              — blanco y negro con tinte verde de visión nocturna
    *  "none"            — la foto se usa tal cual (ya es una captura real de CCTV)
    */
-  grade?: "night" | "ir" | "none";
+  grade?: "night" | "ir" | "none" | "nightHard";
   /**
    * Recorte por zoom, 1 = sin recortar. Los clips generados vienen con el
    * viñeteado circular de ojo de pez quemado en la imagen: un zoom de 1.2 se
    * come los arcos negros de las esquinas y deja el cuadro limpio.
    */
   zoom?: number;
+  /** Encuadre de la foto o el video dentro del panel (CSS object-position) */
+  focus?: string;
 };
 
 export const CAMERAS: Camera[] = [
@@ -90,11 +92,16 @@ export const CAMERAS: Camera[] = [
     label: "CAM 04",
     zone: "Tótem de Seguridad",
     scene: "totem",
-    // Pre-cableada: apenas exista cam4.mp4 se usa sola, sin tocar nada.
-    // Mientras no esté, cae en la escena vectorial del tótem.
-    video: "/cams/cam4.mp4",
-    grade: "none",
-    zoom: 1.22,
+    // Foto real del producto. El encuadre está corrido hacia arriba para que
+    // entren el cabezal con la cámara y la pantalla con el operador: es lo que
+    // hace que se lea como el tótem y no como un cartel cualquiera.
+    // Se filma de día, así que va con corrección nocturna fuerte; la pantalla
+    // es emisiva y sigue siendo lo más brillante del cuadro, que es justo el
+    // efecto que buscamos.
+    image: "/cams/cam4.png",
+    grade: "nightHard",
+    focus: "50% 16%",
+    zoom: 1.04,
   },
 ];
 
@@ -170,6 +177,8 @@ export const GRADE = {
   night: "blur(0.7px) saturate(0.42) brightness(0.5) contrast(1.22)",
   ir: "blur(0.8px) grayscale(1) brightness(0.62) contrast(1.42)",
   none: "blur(0.4px)",
+  /** Para material luminoso o diurno que tiene que pasar por las 3 de la mañana */
+  nightHard: "blur(0.5px) saturate(0.34) brightness(0.52) contrast(1.18)",
 } as const;
 
 /**

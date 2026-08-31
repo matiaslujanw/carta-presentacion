@@ -40,6 +40,17 @@ Abre en http://localhost:3000
 
 Se combinan: `?consorcio=Barrio Los Nogales&modo=auto`
 
+## Escritorio y celular
+
+La demo tiene dos vistas, no una escalada. En pantallas de más de 820 px de
+ancho se usa el panel de 1920x1080 escalado; abajo de eso —o con menos de
+500 px de alto, que es un celular acostado— se arma un recorrido vertical
+pensado para el pulgar. Es donde más se ve: el QR lo escanean los vecinos.
+
+Las dos consumen el mismo hook [`useDemoMachine`](lib/useDemoMachine.ts), así
+que los pasos, los tiempos y el video son idénticos y no se pueden
+desincronizar. Lo único que cambia es cómo se acomoda en pantalla.
+
 ## El material de cámara
 
 Las cámaras 01, 02 y 03 usan video real generado en Flow; la 04 todavía usa una

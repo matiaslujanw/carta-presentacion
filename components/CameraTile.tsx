@@ -28,7 +28,13 @@ function useCoverRect(
   aspect: number,
   zoom: number,
 ) {
-  const [rect, setRect] = useState<{ l: number; t: number; w: number; h: number } | null>(null);
+  const [rect, setRect] = useState<{
+    l: number;
+    t: number;
+    w: number;
+    h: number;
+    W: number;
+  } | null>(null);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -46,7 +52,7 @@ function useCoverRect(
       }
       w *= zoom;
       h *= zoom;
-      setRect({ l: (W - w) / 2, t: (H - h) / 2, w, h });
+      setRect({ l: (W - w) / 2, t: (H - h) / 2, w, h, W });
     });
     ro.observe(el);
     return () => ro.disconnect();
@@ -113,6 +119,9 @@ export default function CameraTile({
   const zoom = camera.zoom ?? 1;
   const rootRef = useRef<HTMLDivElement>(null);
   const cover = useCoverRect(rootRef, 16 / 9, zoom);
+  // En un celular el mismo tile "compacto" mide 160 px en vez de 800: sin esto
+  // el rótulo se come la imagen. Por debajo de 300 px se deja sólo lo esencial.
+  const narrow = (cover?.W ?? 9999) < 300;
 
   return (
     <div
@@ -150,6 +159,7 @@ export default function CameraTile({
               preload="auto"
               disablePictureInPicture
               onError={() => setMediaFailed(true)}
+              style={{ objectPosition: camera.focus }}
               className="h-full w-full object-cover"
             />
           ) : useMedia ? (
@@ -158,6 +168,7 @@ export default function CameraTile({
               src={camera.image}
               alt=""
               onError={() => setMediaFailed(true)}
+              style={{ objectPosition: camera.focus }}
               className="h-full w-full object-cover"
             />
           ) : (
@@ -224,28 +235,32 @@ export default function CameraTile({
           <div className="flex items-center gap-2">
             <span
               className={`font-mono font-semibold tracking-[0.14em] text-ink/95 ${
-                compact ? "text-[11px]" : "text-[15px]"
+                narrow ? "text-[9px]" : compact ? "text-[11px]" : "text-[15px]"
               }`}
               style={{ textShadow: "0 1px 4px rgba(0,0,0,0.9)" }}
             >
               {camera.label}
             </span>
-            <span
-              className={`tracking-[0.1em] text-ink/60 uppercase ${
-                compact ? "text-[9px]" : "text-[12px]"
-              }`}
-              style={{ textShadow: "0 1px 4px rgba(0,0,0,0.9)" }}
-            >
-              {camera.zone}
-            </span>
+            {!narrow && (
+              <span
+                className={`tracking-[0.1em] text-ink/60 uppercase ${
+                  compact ? "text-[9px]" : "text-[12px]"
+                }`}
+                style={{ textShadow: "0 1px 4px rgba(0,0,0,0.9)" }}
+              >
+                {camera.zone}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1.5">
             <span
-              className={`rec-pulse rounded-full bg-alert ${compact ? "h-1.5 w-1.5" : "h-2 w-2"}`}
+              className={`rec-pulse rounded-full bg-alert ${
+                narrow ? "h-1 w-1" : compact ? "h-1.5 w-1.5" : "h-2 w-2"
+              }`}
             />
             <span
               className={`font-mono tracking-[0.12em] text-ink/80 ${
-                compact ? "text-[9px]" : "text-[11px]"
+                narrow ? "text-[8px]" : compact ? "text-[9px]" : "text-[11px]"
               }`}
               style={{ textShadow: "0 1px 4px rgba(0,0,0,0.9)" }}
             >
@@ -259,11 +274,11 @@ export default function CameraTile({
             className={`font-mono text-ink/75 ${compact ? "text-[9px]" : "text-[12px]"}`}
             style={{ textShadow: "0 1px 4px rgba(0,0,0,0.9)" }}
           >
-            {camera.ir ? "IR ON · 1080p · 25 fps" : "1080p · 25 fps"}
+            {narrow ? (camera.ir ? "IR ON" : "") : camera.ir ? "IR ON · 1080p · 25 fps" : "1080p · 25 fps"}
           </span>
           <span
             className={`font-mono tabular-nums text-ink/90 ${
-              compact ? "text-[10px]" : "text-[13px]"
+              narrow ? "text-[9px]" : compact ? "text-[10px]" : "text-[13px]"
             }`}
             style={{ textShadow: "0 1px 4px rgba(0,0,0,0.9)" }}
           >
@@ -295,7 +310,11 @@ export default function CameraTile({
             style={{ boxShadow: "inset 0 0 0 2px rgba(212,161,58,0.85)" }}
           />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center pb-9">
-            <span className="hint-pulse rounded-full border border-gold/60 bg-black/75 px-3 py-1 text-[11px] font-medium tracking-wide text-goldhi backdrop-blur-sm">
+            <span
+              className={`hint-pulse rounded-full border border-gold/60 bg-black/75 font-medium tracking-wide text-goldhi backdrop-blur-sm ${
+                narrow ? "px-2 py-0.5 text-[9px]" : "px-3 py-1 text-[11px]"
+              }`}
+            >
               Analizando movimiento…
             </span>
           </div>

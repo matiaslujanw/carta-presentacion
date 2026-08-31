@@ -16,13 +16,17 @@ EN USO
   Como es el mismo plano, el encuadre y la luz coinciden solos: no hay salto
   posible entre pantallas.
 
-FALTA
-  cam4.mp4   Vereda con el tótem               → Cam 04
-  Mientras no esté, la Cam 04 usa la escena vectorial de respaldo.
-  Generalo en Flow pasándole una FOTO REAL del tótem como imagen de arranque,
-  o si no Flow te inventa una columna que no es tu producto.
+  cam4.png   Foto real del tótem               → Cam 04
+  Es una foto, no video: va con corrección nocturna fuerte y una deriva lenta
+  para que no parezca congelada al lado de los otros tres feeds. El encuadre
+  está corrido hacia arriba (focus en lib/config.ts) para que entren el cabezal
+  con la cámara y la pantalla con el operador.
 
 RESERVA
+  _reserva-totem-vertical.mp4
+  Video del tótem en un lobby. No entró: salió vertical, de día y con la
+  cámara acercándose. Sirve como pieza de marketing, no como feed de cámara.
+
   _reserva-porton.mp4
   Silueta encapuchada sosteniendo un portón. Es la mejor toma de todas, pero
   es otro lugar y no hay versión vacía del mismo encuadre. Si algún día

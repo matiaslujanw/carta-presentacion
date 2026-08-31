@@ -61,20 +61,18 @@ export default function DetectionOverlay({
   const BOX = box ?? INTRUDER.box;
 
   if (lost) {
+    // Centrado en el cuadro y no sobre el bounding box: el objetivo ya no está
+    // en ningún lado, y anclarlo a la última posición se desbordaba del panel.
     return (
-      <div className="pointer-events-none absolute inset-0">
-        <div
-          className="fade-up absolute"
-          style={{ left: `${BOX.left}%`, top: `${BOX.top}%` }}
+      <div className="pointer-events-none absolute inset-0 flex items-start justify-center">
+        <span
+          className={`fade-up mt-[12%] rounded-sm border border-alert/70 bg-black/85 text-center font-mono font-bold tracking-wider text-alert ${
+            compact ? "px-2 py-1 text-[10px]" : "px-2.5 py-1.5 text-[13px]"
+          }`}
         >
-          <span
-            className={`rounded-sm border border-alert/70 bg-black/85 font-mono font-bold tracking-wider text-alert ${
-              compact ? "px-1.5 py-[3px] text-[9px]" : "px-2.5 py-1.5 text-[13px]"
-            }`}
-          >
-            SEGUIMIENTO PERDIDO — OBJETIVO FUERA DE CUADRO
-          </span>
-        </div>
+          SEGUIMIENTO PERDIDO
+          {!compact && " — OBJETIVO FUERA DE CUADRO"}
+        </span>
       </div>
     );
   }
