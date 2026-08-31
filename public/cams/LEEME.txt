@@ -1,0 +1,27 @@
+CARPETA DE MATERIAL REAL — Vig.IA demo
+=======================================
+
+Poné acá las fotos con ESTOS NOMBRES EXACTOS (todo en minúscula):
+
+  cam1.jpg      Hall / entrada principal del edificio
+  cam2.jpg      Cochera / acceso vehicular
+  cam3.jpg      Perímetro lateral / reja exterior   <-- la cámara del evento
+  cam4.jpg      Vereda con el tótem de seguridad
+  intruso.png   Silueta de la persona, con fondo transparente (opcional)
+
+No hay que tocar código. Si un archivo no está, la demo usa
+automáticamente la escena vectorial de respaldo para esa cámara.
+
+FORMATO
+  - Relación de aspecto 16:9 (ej. 1920x1080). Si no es 16:9 se recorta al centro.
+  - JPG de buena calidad, hasta ~500 KB cada una para que cargue rápido en Zoom.
+  - Pueden ser fotos de día: la demo les aplica corrección nocturna / infrarroja.
+
+SI CAMBIÁS cam3.jpg
+  Puede que el recuadro rojo de la IA no caiga justo sobre la persona.
+  Se ajusta en lib/config.ts, en INTRUDER.figure y INTRUDER.box
+  (valores en % del cuadro: left, top, width, height).
+
+VIDEO
+  Si tenés loops reales en mp4, ponelos como cam3.mp4 y seteá
+  video: "/cams/cam3.mp4" en la cámara correspondiente de lib/config.ts.

@@ -1,0 +1,326 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------
+   Tokens de marca Vig.IA (tomados del sitio vigiaseguridad.com.ar)
+   --------------------------------------------------------------- */
+@theme {
+  --color-void: #050505;
+  --color-panel: #0a0a0b;
+  --color-elev: #121216;
+  --color-elev2: #1a1a1f;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line2: rgba(255, 255, 255, 0.14);
+
+  --color-gold: #d4a13a;
+  --color-goldhi: #f1cf6b;
+  --color-golddim: rgba(212, 161, 58, 0.25);
+
+  --color-ink: #e5e7eb;
+  --color-ink2: #d5d8dc;
+  --color-muted: #9aa0a8;
+  --color-faint: #6b7076;
+
+  --color-alert: #ff3535;
+  --color-alertdim: rgba(255, 53, 53, 0.16);
+  --color-cta: #2563eb;
+  --color-ctahi: #3b82f6;
+  --color-ok: #10b981;
+
+  --font-sans: var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, monospace;
+}
+
+html,
+body {
+  background: #000;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------
+   Animaciones del panel
+   --------------------------------------------------------------- */
+
+/* Deriva lenta de la imagen: le da "vida" al feed sin ser video */
+@keyframes feedDrift {
+  0% {
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.1) translate3d(-0.8%, -0.6%, 0);
+  }
+  100% {
+    transform: scale(1.06) translate3d(0, 0, 0);
+  }
+}
+.feed-drift {
+  animation: feedDrift 26s ease-in-out infinite;
+}
+
+/* Scanlines que bajan, como un feed de CCTV */
+@keyframes scanSweep {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(220%);
+  }
+}
+.scan-sweep {
+  animation: scanSweep 7s linear infinite;
+}
+
+@keyframes grainShift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  20% {
+    transform: translate3d(-1%, 1%, 0);
+  }
+  40% {
+    transform: translate3d(1%, -1%, 0);
+  }
+  60% {
+    transform: translate3d(-1%, -1%, 0);
+  }
+  80% {
+    transform: translate3d(1%, 1%, 0);
+  }
+}
+.grain {
+  animation: grainShift 0.6s steps(2) infinite;
+}
+
+/* Punto REC */
+@keyframes recPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.18;
+  }
+}
+.rec-pulse {
+  animation: recPulse 1.4s ease-in-out infinite;
+}
+
+/* Borde rojo de advertencia sobre la cámara en alerta */
+@keyframes alertFrame {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 0 3px rgba(255, 53, 53, 0.95),
+      0 0 46px rgba(255, 53, 53, 0.34);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 3px rgba(255, 53, 53, 0.25),
+      0 0 10px rgba(255, 53, 53, 0.1);
+  }
+}
+.alert-frame {
+  animation: alertFrame 1s ease-in-out infinite;
+}
+
+@keyframes alertText {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.42;
+  }
+}
+.alert-text {
+  animation: alertText 1.05s ease-in-out infinite;
+}
+
+/* Lock-on del bounding box: entra grande y se ajusta al objetivo */
+@keyframes lockOn {
+  0% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.lock-on {
+  animation: lockOn 0.72s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+@keyframes boxBreathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.62;
+  }
+}
+.box-breathe {
+  animation: boxBreathe 1.5s ease-in-out infinite;
+}
+
+/* Onda de audio de la central */
+@keyframes wave {
+  0%,
+  100% {
+    transform: scaleY(0.16);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+.wave-bar {
+  animation: wave 0.7s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* Barrido tipo radar del indicador de IA */
+@keyframes sweepRot {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.sweep-rot {
+  animation: sweepRot 3.4s linear infinite;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-up {
+  animation: fadeUp 0.42s ease-out both;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.955) translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.pop-in {
+  animation: popIn 0.4s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+/* CTA que respira para guiar al vendedor */
+@keyframes ctaGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.55);
+  }
+  60% {
+    box-shadow: 0 0 0 15px rgba(59, 130, 246, 0);
+  }
+}
+.cta-glow {
+  animation: ctaGlow 2s ease-out infinite;
+}
+
+@keyframes okGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+  }
+  60% {
+    box-shadow: 0 0 0 15px rgba(16, 185, 129, 0);
+  }
+}
+.ok-glow {
+  animation: okGlow 2s ease-out infinite;
+}
+
+/* Hint discreto y parpadeante para avanzar de pantalla */
+@keyframes hintPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.hint-pulse {
+  animation: hintPulse 1.6s ease-in-out infinite;
+}
+
+/* El intruso trepa y luego se retira del cuadro */
+@keyframes intruderClimb {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(-6px, -16px);
+  }
+}
+.intruder-climb {
+  animation: intruderClimb 5.5s ease-in-out infinite alternate;
+}
+
+@keyframes intruderFlee {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  35% {
+    transform: translate(40px, 26px);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(230px, 40px);
+    opacity: 0;
+  }
+}
+.intruder-flee {
+  animation: intruderFlee 2.6s cubic-bezier(0.4, 0, 0.7, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-drift,
+  .scan-sweep,
+  .grain,
+  .sweep-rot,
+  .intruder-climb {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------
+   Impresión: solo el reporte, formato A4
+   --------------------------------------------------------------- */
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    overflow: visible !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
+.print-only {
+  display: none;
+}
