@@ -1,6 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  playAlarm,
+  playLock,
+  playPaClose,
+  playPaOpen,
+  playResolve,
+  playVoice,
+  probeVoice,
+  stopVoice,
+  unlockAudio,
+} from "@/lib/sound";
 import CameraTile, { type Clip } from "./CameraTile";
 import Cam3Still from "./Cam3Still";
 import DetectionOverlay from "./DetectionOverlay";
@@ -42,7 +53,7 @@ const AUTO_MS: Record<Scene, number> = {
 
 const BEATS: Record<
   "deteccion" | "disuasion" | "despejado",
-  { tag: string; hora: string; titulo: string; texto: string; cta: string }
+  { tag: string; hora: string; titulo: string; texto: string; cita?: string; cta: string }
 > = {
   deteccion: {
     tag: "La IA detecta",
@@ -57,7 +68,8 @@ const BEATS: Record<
     hora: "03:14:25",
     titulo: "Tres segundos después hay un operador mirando",
     texto:
-      "No es un robot: es alguien de la central que ve la misma imagen y le habla por el altoparlante del tótem. «Usted está siendo filmado y la policía está en camino.»",
+      "No es un robot: es alguien de la central que ve la misma imagen y le habla por el altoparlante del tótem.",
+    cita: "Usted está siendo filmado y la policía está en camino. Retírese del perímetro inmediatamente.",
     cta: "Ver qué hace el sospechoso",
   },
   despejado: {
@@ -101,6 +113,37 @@ const PASOS = [
   },
 ];
 
+/* ── Onda del audio del tótem. Determinista, para no romper la hidratación ── */
+const BARS = Array.from({ length: 26 }, (_, i) => ({
+  h: 0.2 + 0.8 * Math.abs(Math.sin(i * 1.37) * Math.cos(i * 0.61)),
+  d: (i % 7) * 0.09,
+}));
+
+function Waveform({ active }: { active: boolean }) {
+  return (
+    <div className="flex h-10 items-center justify-between gap-[3px]">
+      {BARS.map((b, i) => (
+        <span
+          key={i}
+          className={active ? "wave-bar" : ""}
+          style={{
+            width: 4,
+            height: `${(active ? b.h : 0.07) * 100}%`,
+            minHeight: 3,
+            borderRadius: 2,
+            background: active
+              ? "linear-gradient(to top, #c08f27, #f1cf6b)"
+              : "rgba(255,255,255,0.14)",
+            animationDelay: `${b.d}s`,
+            animationDuration: `${0.5 + (i % 5) * 0.07}s`,
+            transition: "height .3s ease",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function Presentation() {
   const [scene, setScene] = useState<Scene>("cover");
   const [consorcio, setConsorcio] = useState(DEFAULT_CONSORCIO);
@@ -108,6 +151,13 @@ export default function Presentation() {
   const [sello, setSello] = useState(true);
   const [confidence, setConfidence] = useState<number>(DETECTION.confidenceStart);
   const [clipsOk, setClipsOk] = useState(true);
+  const [sound, setSound] = useState(true);
+  const [hasVoice, setHasVoice] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  // Sin un toque previo el navegador no deja sonar. En modo automático
+  // (el del QR) no hay toque, así que se ofrece activarlo.
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [isLocal, setIsLocal] = useState(false);
 
   // En pantalla chica la etiqueta de la IA va en versión corta: la larga se
   // monta encima del rótulo de la cámara.
@@ -118,6 +168,13 @@ export default function Presentation() {
     sync();
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    void probeVoice().then(setHasVoice);
+    // El recordatorio de que falta la grabación es una nota de trabajo:
+    // se muestra sólo en local, nunca delante de un cliente.
+    setIsLocal(/^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(window.location.hostname));
   }, []);
 
   const eventCam = CAMERAS.find((c) => c.id === EVENT_CAMERA)!;
@@ -154,6 +211,55 @@ export default function Presentation() {
     return () => cancelAnimationFrame(raf);
   }, [scene]);
 
+  /* ── El operativo suena: alarma, altoparlante, voz y cierre ── */
+  useEffect(() => {
+    if (!sound || !audioUnlocked) return;
+    let alive = true;
+    stopVoice();
+    setSpeaking(false);
+
+    if (scene === "deteccion") {
+      playAlarm();
+      const id = setTimeout(() => alive && playLock(), 1150);
+      return () => {
+        alive = false;
+        clearTimeout(id);
+      };
+    }
+
+    if (scene === "disuasion") {
+      playPaOpen();
+      setSpeaking(true);
+      const id = setTimeout(() => {
+        if (!alive) return;
+        void playVoice().then((dur) => {
+          if (!alive) return;
+          // Sin grabación, la onda igual acompaña al texto en pantalla
+          const ms = (dur > 0 ? dur : 5) * 1000;
+          setTimeout(() => alive && setSpeaking(false), ms);
+        });
+      }, 320);
+      return () => {
+        alive = false;
+        clearTimeout(id);
+        stopVoice();
+      };
+    }
+
+    if (scene === "despejado") {
+      playPaClose();
+      const id = setTimeout(() => alive && playResolve(), 280);
+      return () => {
+        alive = false;
+        clearTimeout(id);
+      };
+    }
+
+    return () => {
+      alive = false;
+    };
+  }, [scene, sound, audioUnlocked]);
+
   const go = useCallback((s: Scene) => {
     setScene(s);
     topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -164,7 +270,18 @@ export default function Presentation() {
     go(ORDER[Math.min(i + 1, ORDER.length - 1)]);
   }, [scene, go]);
 
-  const restart = useCallback(() => go("cover"), [go]);
+  const restart = useCallback(() => {
+    stopVoice();
+    setSpeaking(false);
+    go("cover");
+  }, [go]);
+
+  /** El primer toque desbloquea el audio del navegador */
+  const enableAudio = useCallback(() => {
+    unlockAudio();
+    setAudioUnlocked(true);
+    setSound(true);
+  }, []);
 
   /* ── Modo automático, el del QR ── */
   useEffect(() => {
@@ -230,7 +347,10 @@ export default function Presentation() {
 
               <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <button
-                  onClick={() => go("deteccion")}
+                  onClick={() => {
+                    enableAudio();
+                    go("deteccion");
+                  }}
                   className="cta-glow flex items-center justify-center gap-3 rounded-2xl bg-gold px-8 py-5 text-[18px] font-bold text-black transition-all hover:brightness-110"
                 >
                   Empezar simulación
@@ -260,7 +380,35 @@ export default function Presentation() {
         <section className="flex min-h-[100dvh] flex-col">
           <header className="flex items-center gap-4 px-4 py-4 sm:px-8">
             <Logo size="sm" />
-            <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={() => {
+                if (!audioUnlocked) enableAudio();
+                else {
+                  stopVoice();
+                  setSound((v) => !v);
+                }
+              }}
+              aria-label={sound && audioUnlocked ? "Silenciar" : "Activar sonido"}
+              className={`ml-auto flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors ${
+                sound && audioUnlocked
+                  ? "border-gold/40 bg-golddim/40 text-goldhi"
+                  : "border-line2 text-muted hover:bg-white/[0.05]"
+              }`}
+            >
+              {sound && audioUnlocked ? (
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
+                  <path d="M4 9v6h3.5L12 18.5v-13L7.5 9H4Z" />
+                  <path d="M16 9.5a3.5 3.5 0 0 1 0 5M18.5 7a7 7 0 0 1 0 10" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
+                  <path d="M4 9v6h3.5L12 18.5v-13L7.5 9H4Z" />
+                  <path d="m16.5 10 4 4m0-4-4 4" />
+                </svg>
+              )}
+              {sound && audioUnlocked ? "Sonido" : "Activar sonido"}
+            </button>
+            <div className="flex items-center gap-2">
               {(["deteccion", "disuasion", "despejado"] as const).map((s, i) => (
                 <span
                   key={s}
@@ -317,15 +465,47 @@ export default function Presentation() {
                 {beat.texto}
               </p>
 
-              {scene === "disuasion" && (
-                <div className="mt-5 inline-flex items-center gap-3 rounded-xl border border-gold/40 bg-golddim/40 px-4 py-3">
-                  <span className="font-mono text-[26px] leading-none font-bold text-ok tabular-nums">
-                    {RESPONSE_TARGET},0 s
-                  </span>
-                  <span className="text-[13px] leading-tight text-ink2">
-                    de la detección
-                    <br />a la voz del operador
-                  </span>
+              {scene === "disuasion" && beat.cita && (
+                <div className="mt-5 rounded-xl border border-gold/40 bg-golddim/40 p-4">
+                  <div className="flex items-center gap-2.5">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-goldhi" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                      <rect x="9" y="2.5" width="6" height="11" rx="3" />
+                      <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" />
+                    </svg>
+                    <span className="text-[11px] font-bold tracking-[0.16em] text-goldhi uppercase">
+                      Altoparlante del tótem
+                    </span>
+                    {speaking && (
+                      <span className="alert-text ml-auto rounded-full bg-alert px-2 py-0.5 text-[9px] font-bold tracking-widest text-white">
+                        EN VIVO
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="mt-3 text-[clamp(15px,2.2vw,19px)] leading-relaxed font-semibold text-goldhi italic">
+                    «{beat.cita}»
+                  </p>
+
+                  <div className="mt-3 rounded-lg border border-line bg-black/45 px-3 py-1">
+                    <Waveform active={speaking} />
+                  </div>
+
+                  <div className="mt-3 flex items-center gap-3 border-t border-gold/20 pt-3">
+                    <span className="font-mono text-[24px] leading-none font-bold text-ok tabular-nums">
+                      {RESPONSE_TARGET},0 s
+                    </span>
+                    <span className="text-[12.5px] leading-tight text-ink2">
+                      de la detección a la voz del operador
+                    </span>
+                  </div>
+
+                  {isLocal && !hasVoice && (
+                    <p className="mt-3 text-[11.5px] leading-relaxed text-muted">
+                      Falta la grabación del operador. Subila a
+                      <span className="font-mono text-ink2"> /audio/operador.mp3</span> y se
+                      reproduce sola acá.
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -439,6 +619,20 @@ export default function Presentation() {
             </p>
           </div>
         </section>
+      )}
+
+      {/* Sin gesto previo el navegador bloquea el audio: se ofrece activarlo */}
+      {isBeat && !audioUnlocked && (
+        <button
+          onClick={enableAudio}
+          className="fixed right-4 bottom-4 z-50 flex items-center gap-2 rounded-full border border-gold/50 bg-black/85 px-4 py-3 text-[13px] font-bold text-goldhi shadow-xl backdrop-blur"
+        >
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
+            <path d="M4 9v6h3.5L12 18.5v-13L7.5 9H4Z" />
+            <path d="M16 9.5a3.5 3.5 0 0 1 0 5M18.5 7a7 7 0 0 1 0 10" />
+          </svg>
+          Activar sonido
+        </button>
       )}
 
       {/* Progreso del modo automático, el del QR */}

@@ -47,6 +47,26 @@ celular, un recorrido vertical. Las dos vistas consumen el mismo hook
 
 Se combinan: `?consorcio=Barrio Los Nogales&modo=auto`
 
+## Sonido
+
+Los sonidos de máquina —la alarma de la analítica, el enganche del recuadro,
+el clic del altoparlante— se sintetizan en el navegador con Web Audio
+([`lib/sound.ts`](lib/sound.ts)). No son archivos: no hay nada que descargar y
+funcionan sin conexión.
+
+La **voz del operador** sí es un archivo, y todavía falta:
+`public/audio/operador.mp3`. Tiene que ser una persona real grabada, no una voz
+sintética: todo el argumento de venta es que del otro lado hay alguien. Ver
+[`public/audio/LEEME.txt`](public/audio/LEEME.txt). Si el archivo no está, la
+frase igual se lee en pantalla y el resto del operativo suena normal.
+
+El navegador no deja sonar nada hasta que la persona toca algo, así que el audio
+se desbloquea con el botón "Empezar simulación". En modo automático aparece un
+botón "Activar sonido".
+
+> **En Zoom**, al compartir pantalla hay que tildar **"Compartir sonido"**. Si no,
+> los vecinos ven la demo pero no escuchan nada.
+
 ## El material de cámara
 
 Las cámaras 01, 02 y 03 usan video real generado en Flow; la 04 todavía usa una
