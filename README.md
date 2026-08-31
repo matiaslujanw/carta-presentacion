@@ -40,34 +40,20 @@ Abre en http://localhost:3000
 
 Se combinan: `?consorcio=Barrio Los Nogales&modo=auto`
 
-## Cambiar las fotos de las cámaras
+## El material de cámara
 
-Las cámaras traen una escena vectorial de respaldo, pero están cableadas para
-usar fotos reales. Copiá los archivos a `public/cams/` con estos nombres:
+Las cámaras 01, 02 y 03 usan video real generado en Flow; la 04 todavía usa una
+escena vectorial de respaldo. Los archivos y cómo se reemplazan están
+documentados en [`public/cams/LEEME.txt`](public/cams/LEEME.txt).
 
-| Archivo | Cámara |
-|---|---|
-| `cam1.jpg` | Hall / entrada principal |
-| `cam2.jpg` | Cochera / acceso vehicular |
-| `cam3.jpg` | Perímetro lateral / reja — **la cámara del evento** |
-| `cam4.jpg` | Vereda con el tótem |
-| `intruso.png` | Silueta del sospechoso, fondo transparente (opcional) |
+Lo importante: **la Cam 03 sale de una sola toma continua**
+(`cam3.mp4`). Los tres estados —perímetro vacío, persona merodeando, persona
+retirándose— son tramos de ese mismo plano, definidos en `EVENT_TAKE` dentro de
+[`lib/config.ts`](lib/config.ts). Por eso el encuadre y la luz coinciden entre
+pantallas sin que haya nada que ajustar.
 
-No hay que tocar código: si el archivo está, se usa la foto; si no está, se
-dibuja la escena de respaldo. Formato 16:9 (ideal 1920x1080), JPG hasta ~500 KB.
-**Pueden ser fotos de día**: la demo les aplica corrección nocturna e infrarroja
-para que se lean como un feed de las 3 de la mañana.
-
-### Si cambiás `cam3.jpg`
-
-El recuadro rojo puede no caer justo sobre la persona. Se ajusta en
-[`lib/config.ts`](lib/config.ts), en `INTRUDER.figure` y `INTRUDER.box`
-(valores en % del cuadro: `left`, `top`, `width`, `height`).
-
-### Video en lugar de fotos
-
-Si tenés loops reales en mp4, ponelos en `public/cams/` y agregá
-`video: "/cams/cam3.mp4"` a la cámara correspondiente en `lib/config.ts`.
+Si falta un archivo, esa cámara cae sola en su escena vectorial y la demo sigue
+funcionando.
 
 ## Textos, tiempos y marca
 

@@ -49,12 +49,42 @@ export type Camera = {
    *  "none"            — la foto se usa tal cual (ya es una captura real de CCTV)
    */
   grade?: "night" | "ir" | "none";
+  /**
+   * Recorte por zoom, 1 = sin recortar. Los clips generados vienen con el
+   * viñeteado circular de ojo de pez quemado en la imagen: un zoom de 1.2 se
+   * come los arcos negros de las esquinas y deja el cuadro limpio.
+   */
+  zoom?: number;
 };
 
 export const CAMERAS: Camera[] = [
-  { id: 1, label: "CAM 01", zone: "Entrada principal / Hall", scene: "hall", image: "/cams/cam1.jpg" },
-  { id: 2, label: "CAM 02", zone: "Cochera / Acceso vehicular", scene: "cochera", image: "/cams/cam2.jpg" },
-  { id: 3, label: "CAM 03", zone: "Perímetro lateral / Rejas", scene: "perimetro", image: "/cams/cam3.jpg", ir: true },
+  {
+    id: 1,
+    label: "CAM 01",
+    zone: "Entrada principal / Hall",
+    scene: "hall",
+    video: "/cams/cam1.mp4",
+    grade: "none",
+    zoom: 1.22,
+  },
+  {
+    id: 2,
+    label: "CAM 02",
+    zone: "Cochera / Acceso vehicular",
+    scene: "cochera",
+    video: "/cams/cam2.mp4",
+    grade: "none",
+    zoom: 1.22,
+  },
+  {
+    id: 3,
+    label: "CAM 03",
+    zone: "Perímetro lateral / Rejas",
+    scene: "perimetro",
+    // El video lo maneja EVENT_TAKE, porque esta cámara tiene tres estados
+    grade: "none",
+    ir: true,
+  },
   { id: 4, label: "CAM 04", zone: "Tótem de Seguridad", scene: "totem", image: "/cams/cam4.jpg" },
 ];
 
@@ -162,7 +192,7 @@ export const INTRUDER = {
    * Se calibra mirando el clip: es el único número que hay que ajustar a mano
    * cuando cambia el material de la Cam 03.
    */
-  boxBaked: { left: 62, top: 22, width: 15, height: 52 },
+  boxBaked: { left: 46.5, top: 35, width: 14.5, height: 48 },
   /**
    * Con la persona grabada en el video no se la puede seguir cuando escapa:
    * el tracker "pierde" el objetivo, que es exactamente lo que hace un sistema
@@ -172,34 +202,28 @@ export const INTRUDER = {
 };
 
 /**
- * Clips de la cámara del evento (Cam 03). Tres estados del MISMO lugar, con el
- * mismo encuadre y la misma luz, para que el cambio entre pantallas no se note:
+ * La cámara del evento (Cam 03) sale de UNA SOLA TOMA CONTINUA.
  *
- *   idle     → la reja vacía, sin novedad (Pantalla 1)
- *   intruder → la persona merodeando o trepando, quieta en cuadro (Pantallas 2 y 3)
- *   flee     → la persona se va y el cuadro queda vacío (final de la Pantalla 3)
+ * El clip real filma, sin cortar, las tres cosas que necesita la demo:
  *
- * Los tres se precargan y se cruzan por opacidad, así no hay parpadeo negro al
- * cambiar de pantalla. Si un archivo no está, se usa la foto o la escena de
- * respaldo, y la demo sigue funcionando igual.
+ *   1,90 → 3,50 s   la persona merodeando junto a la reja  (Hojas 2 y 3)
+ *   3,50 → 6,60 s   se retira y el cuadro se vacía         (final de la Hoja 3)
+ *   6,55 → 7,95 s   el perímetro vacío, en loop            (Hoja 1)
+ *
+ * Al ser el mismo plano, el encuadre y la luz coinciden por construcción: no
+ * hay forma de que se note un salto entre pantallas. Si algún día cambiás el
+ * material, lo único que hay que retocar son estos segundos y INTRUDER.boxBaked.
  */
-export const EVENT_CLIPS = {
-  idle: "/cams/cam3-idle.mp4",
-  intruder: "/cams/cam3-intruso.mp4",
-  flee: "/cams/cam3-huye.mp4",
+export const EVENT_TAKE = {
+  src: "/cams/cam3.mp4",
+  idle: { start: 6.55, end: 7.95 },
+  intruder: { start: 1.9, end: 3.5 },
+  flee: { start: 3.5, end: 6.6 },
 } as const;
 
-/**
- * Las dos capturas que van adjuntas al reporte del administrador.
- *
- * Si hay video, se congela un frame del propio clip en el segundo indicado
- * (no hace falta generar ninguna imagen aparte, y la captura siempre coincide
- * con el material real). Si preferís una imagen propia, poné el archivo en
- * public/cams/ y seteá `still`.
- */
 export const SNAPSHOT_FRAMES = {
   /** Frame con el intruso detectado */
-  intruder: { clip: EVENT_CLIPS.intruder, at: 2.2, still: "" },
+  intruder: { clip: EVENT_TAKE.src, at: 2.7, still: "" },
   /** Frame del perímetro ya despejado */
-  clear: { clip: EVENT_CLIPS.flee, at: 5.5, still: "" },
+  clear: { clip: EVENT_TAKE.src, at: 7.5, still: "" },
 } as const;

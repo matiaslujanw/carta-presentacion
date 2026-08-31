@@ -271,19 +271,19 @@ export function TotemScene({ uid }: SceneProps) {
     <svg viewBox={VB} className="h-full w-full" preserveAspectRatio="xMidYMid slice">
       <defs>
         <linearGradient id={g("night")} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#0f151b" />
-          <stop offset="100%" stopColor="#080a0d" />
+          <stop offset="0%" stopColor="#1b242e" />
+          <stop offset="100%" stopColor="#0e1216" />
         </linearGradient>
         <linearGradient id={g("walk")} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#191b1d" />
-          <stop offset="100%" stopColor="#0a0b0c" />
+          <stop offset="0%" stopColor="#282c30" />
+          <stop offset="100%" stopColor="#131518" />
         </linearGradient>
         <radialGradient id={g("glow")} cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0%" stopColor="#f1cf6b" stopOpacity="0.4" />
+          <stop offset="0%" stopColor="#f1cf6b" stopOpacity="0.55" />
           <stop offset="100%" stopColor="#f1cf6b" stopOpacity="0" />
         </radialGradient>
         <radialGradient id={g("door")} cx="0.5" cy="0.2" r="0.8">
-          <stop offset="0%" stopColor="#e8d3a2" stopOpacity="0.32" />
+          <stop offset="0%" stopColor="#e8d3a2" stopOpacity="0.5" />
           <stop offset="100%" stopColor="#e8d3a2" stopOpacity="0" />
         </radialGradient>
       </defs>
@@ -291,7 +291,7 @@ export function TotemScene({ uid }: SceneProps) {
       <rect width="640" height="360" fill={`url(#${g("night")})`} />
 
       {/* Fachada del edificio */}
-      <rect x="0" y="0" width="424" height="238" fill="#0e1215" />
+      <rect x="0" y="0" width="424" height="238" fill="#161d23" />
       <rect x="0" y="0" width="424" height="238" fill="none" stroke="#1a2024" />
       {Array.from({ length: 4 }, (_, r) =>
         Array.from({ length: 5 }, (_, c) => {
@@ -304,7 +304,7 @@ export function TotemScene({ uid }: SceneProps) {
               width="44"
               height="28"
               fill={lit ? "#d9c48f" : "#1a2226"}
-              opacity={lit ? 0.3 : 0.5}
+              opacity={lit ? 0.5 : 0.62}
             />
           );
         }),
@@ -313,7 +313,7 @@ export function TotemScene({ uid }: SceneProps) {
       <rect x="140" y="150" width="110" height="88" fill="#141a1e" stroke="#232b31" strokeWidth="2" />
       <rect x="148" y="158" width="94" height="80" fill="#22271f" opacity="0.45" />
       <ellipse cx="195" cy="176" rx="86" ry="60" fill={`url(#${g("door")})`} />
-      <rect x="150" y="140" width="90" height="7" rx="2" fill="#e8d3a2" opacity="0.42" />
+      <rect x="150" y="140" width="90" height="7" rx="2" fill="#e8d3a2" opacity="0.6" />
 
       {/* Árbol */}
       <rect x="386" y="176" width="8" height="62" fill="#12171a" />

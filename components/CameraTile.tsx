@@ -9,9 +9,50 @@ export type Clip = {
   src: string;
   /** true = es el clip que se está viendo ahora */
   active: boolean;
-  /** false para clips que terminan y tienen que quedar congelados en el último frame */
+  /** false para tramos que terminan y quedan congelados en el último frame */
   loop?: boolean;
+  /** Tramo del archivo, en segundos. Permite sacar varios estados de una sola toma */
+  start?: number;
+  end?: number;
 };
+
+/**
+ * Con object-cover la imagen se recorta distinto según la forma del panel, así
+ * que un porcentaje sobre el tile NO es un porcentaje sobre el video. Esto
+ * calcula el rectángulo que la imagen ocupa de verdad, para que la capa de IA
+ * (el bounding box) trabaje siempre en coordenadas del video y caiga sobre la
+ * persona en cualquier pantalla.
+ */
+function useCoverRect(
+  ref: React.RefObject<HTMLDivElement | null>,
+  aspect: number,
+  zoom: number,
+) {
+  const [rect, setRect] = useState<{ l: number; t: number; w: number; h: number } | null>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => {
+      const W = e.contentRect.width;
+      const H = e.contentRect.height;
+      if (!W || !H) return;
+      let w: number, h: number;
+      if (W / H > aspect) {
+        w = W;
+        h = W / aspect;
+      } else {
+        h = H;
+        w = H * aspect;
+      }
+      w *= zoom;
+      h *= zoom;
+      setRect({ l: (W - w) / 2, t: (H - h) / 2, w, h });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref, aspect, zoom]);
+  return rect;
+}
 
 /** Grano de sensor: se genera una vez y se reusa como background */
 const GRAIN_URL =
@@ -69,9 +110,13 @@ export default function CameraTile({
   // El video real ya tiene movimiento propio: la deriva sólo se aplica a las
   // imágenes fijas y a las escenas de respaldo, para que no parezcan una foto.
   const drift = hasStack || camera.video ? "" : "feed-drift";
+  const zoom = camera.zoom ?? 1;
+  const rootRef = useRef<HTMLDivElement>(null);
+  const cover = useCoverRect(rootRef, 16 / 9, zoom);
 
   return (
     <div
+      ref={rootRef}
       onClick={onClick}
       role={interactive ? "button" : undefined}
       className={`group relative overflow-hidden bg-black ${
@@ -82,7 +127,10 @@ export default function CameraTile({
       <div className="absolute inset-0 overflow-hidden">
         <div
           className={`absolute inset-0 ${drift}`}
-          style={hasStack || useMedia ? { filter: grade } : undefined}
+          style={{
+            filter: hasStack || useMedia ? grade : undefined,
+            transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+          }}
         >
           {hasStack ? (
             <ClipStack
@@ -156,8 +204,19 @@ export default function CameraTile({
         }}
       />
 
-      {/* ── Overlays de IA ── */}
-      {children}
+      {/* ── Overlays de IA, en coordenadas del video ── */}
+      {children && (
+        <div
+          className="pointer-events-none absolute"
+          style={
+            cover
+              ? { left: cover.l, top: cover.t, width: cover.w, height: cover.h }
+              : { inset: 0 }
+          }
+        >
+          {children}
+        </div>
+      )}
 
       {/* ── Chrome del feed ── */}
       <div className="pointer-events-none absolute inset-0 flex flex-col justify-between">
@@ -265,24 +324,83 @@ function ClipStack({ clips, onAllFailed }: { clips: Clip[]; onAllFailed: () => v
   }, [failed, clips, onAllFailed]);
 
   useEffect(() => {
+    const cancels: (() => void)[] = [];
+
     clips.forEach((c, i) => {
       const v = refs.current[i];
       if (!v) return;
-      if (c.active) {
-        // Un clip que no loopea (la fuga) arranca siempre desde el principio
-        if (c.loop === false && v.paused) v.currentTime = 0;
-        void v.play().catch(() => {});
-      } else {
+
+      if (!c.active) {
         v.pause();
+        return;
       }
+
+      const start = c.start ?? 0;
+      const end = c.end;
+      const loops = c.loop !== false;
+
+      const rewind = () => {
+        try {
+          v.currentTime = start;
+        } catch {
+          /* todavía sin metadatos: lo reintenta el handler de loadedmetadata */
+        }
+      };
+
+      // Si el tramo no arrancó donde corresponde, lo acomoda
+      if (v.readyState >= 1) {
+        if (end === undefined || v.currentTime < start || v.currentTime > end) rewind();
+      } else {
+        v.addEventListener("loadedmetadata", rewind, { once: true });
+      }
+
+      // Corte del tramo. requestVideoFrameCallback da precisión de cuadro;
+      // timeupdate (4 veces por segundo) se pasaría de largo y dejaría ver
+      // un pedazo del tramo siguiente.
+      if (end !== undefined) {
+        const vAny = v as HTMLVideoElement & {
+          requestVideoFrameCallback?: (cb: () => void) => number;
+          cancelVideoFrameCallback?: (h: number) => void;
+        };
+        if (typeof vAny.requestVideoFrameCallback === "function") {
+          let handle = 0;
+          let alive = true;
+          const tick = () => {
+            if (!alive) return;
+            if (v.currentTime >= end) {
+              if (loops) rewind();
+              else v.pause();
+            }
+            handle = vAny.requestVideoFrameCallback!(tick);
+          };
+          handle = vAny.requestVideoFrameCallback!(tick);
+          cancels.push(() => {
+            alive = false;
+            vAny.cancelVideoFrameCallback?.(handle);
+          });
+        } else {
+          const onTime = () => {
+            if (v.currentTime >= end) {
+              if (loops) rewind();
+              else v.pause();
+            }
+          };
+          v.addEventListener("timeupdate", onTime);
+          cancels.push(() => v.removeEventListener("timeupdate", onTime));
+        }
+      }
+
+      void v.play().catch(() => {});
     });
+
+    return () => cancels.forEach((f) => f());
   }, [clips]);
 
   return (
     <>
       {clips.map((c, i) => (
         <video
-          key={c.src}
+          key={`${c.src}#${c.start ?? 0}`}
           ref={(el) => {
             refs.current[i] = el;
           }}
@@ -290,7 +408,6 @@ function ClipStack({ clips, onAllFailed }: { clips: Clip[]; onAllFailed: () => v
           muted
           playsInline
           preload="auto"
-          loop={c.loop !== false}
           disablePictureInPicture
           onError={() => setFailed((f) => ({ ...f, [i]: true }))}
           className="absolute inset-0 h-full w-full object-cover"

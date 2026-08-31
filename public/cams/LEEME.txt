@@ -1,27 +1,41 @@
-CARPETA DE MATERIAL REAL — Vig.IA demo
-=======================================
+MATERIAL DE CÁMARA — Vig.IA demo
+================================
 
-Poné acá las fotos con ESTOS NOMBRES EXACTOS (todo en minúscula):
+EN USO
+  cam1.mp4   Hall / entrada principal          → Cam 01
+  cam2.mp4   Cochera / acceso vehicular        → Cam 02
+  cam3.mp4   Perímetro lateral                 → Cam 03 (la cámara del evento)
 
-  cam1.jpg      Hall / entrada principal del edificio
-  cam2.jpg      Cochera / acceso vehicular
-  cam3.jpg      Perímetro lateral / reja exterior   <-- la cámara del evento
-  cam4.jpg      Vereda con el tótem de seguridad
-  intruso.png   Silueta de la persona, con fondo transparente (opcional)
+  cam3.mp4 es UNA SOLA TOMA CONTINUA de la que salen los tres estados. Los
+  segundos de cada tramo están en lib/config.ts, en EVENT_TAKE:
 
-No hay que tocar código. Si un archivo no está, la demo usa
-automáticamente la escena vectorial de respaldo para esa cámara.
+      1,90 → 3,50 s   la persona merodeando la reja   (Hojas 2 y 3)
+      3,50 → 6,60 s   se retira, el cuadro se vacía   (final de la Hoja 3)
+      6,55 → 7,95 s   el perímetro vacío, en loop     (Hoja 1)
+
+  Como es el mismo plano, el encuadre y la luz coinciden solos: no hay salto
+  posible entre pantallas.
+
+FALTA
+  cam4.mp4   Vereda con el tótem               → Cam 04
+  Mientras no esté, la Cam 04 usa la escena vectorial de respaldo.
+  Generalo en Flow pasándole una FOTO REAL del tótem como imagen de arranque,
+  o si no Flow te inventa una columna que no es tu producto.
+
+RESERVA
+  _reserva-porton.mp4
+  Silueta encapuchada sosteniendo un portón. Es la mejor toma de todas, pero
+  es otro lugar y no hay versión vacía del mismo encuadre. Si algún día
+  generás ese portón VACÍO con el mismo plano, conviene mudar la Cam 03 a este
+  material: el contraluz es muy superior.
+
+SI CAMBIÁS cam3.mp4
+  Hay que retocar dos cosas en lib/config.ts y nada más:
+   - EVENT_TAKE, los segundos de cada tramo
+   - INTRUDER.boxBaked, dónde cae el recuadro rojo (en % del VIDEO, no del
+     panel: la demo ya corrige el recorte de cada pantalla sola)
 
 FORMATO
-  - Relación de aspecto 16:9 (ej. 1920x1080). Si no es 16:9 se recorta al centro.
-  - JPG de buena calidad, hasta ~500 KB cada una para que cargue rápido en Zoom.
-  - Pueden ser fotos de día: la demo les aplica corrección nocturna / infrarroja.
-
-SI CAMBIÁS cam3.jpg
-  Puede que el recuadro rojo de la IA no caiga justo sobre la persona.
-  Se ajusta en lib/config.ts, en INTRUDER.figure y INTRUDER.box
-  (valores en % del cuadro: left, top, width, height).
-
-VIDEO
-  Si tenés loops reales en mp4, ponelos como cam3.mp4 y seteá
-  video: "/cams/cam3.mp4" en la cámara correspondiente de lib/config.ts.
+  16:9, 1280x720 alcanza y sobra. Sin audio: la demo va en mute.
+  Sin reloj ni texto quemado en la imagen: la demo dibuja el suyo encima y se
+  superponen.

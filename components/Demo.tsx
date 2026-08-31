@@ -15,7 +15,7 @@ import {
   DEFAULT_CONSORCIO,
   DETECTION,
   EVENT_CAMERA,
-  EVENT_CLIPS,
+  EVENT_TAKE,
   EVENT_TOWER,
   INTRUDER,
 } from "@/lib/config";
@@ -63,6 +63,31 @@ export default function Demo() {
         year: "numeric",
       }).format(new Date()),
     );
+  }, []);
+
+  /* ── ¿Está el material de video de la Cam 03 en public/cams/? ──
+     Se sondea con un elemento suelto en vez de uno en el JSX: si el archivo ya
+     está en caché, el navegador dispara loadedmetadata antes de que React
+     alcance a enganchar el handler, y el sondeo quedaba colgado en "pending". */
+  useEffect(() => {
+    if (INTRUDER.mode === "overlay") {
+      setClipProbe("none");
+      return;
+    }
+    const v = document.createElement("video");
+    v.preload = "metadata";
+    v.muted = true;
+    const ok = () => setClipProbe("ok");
+    const bad = () => setClipProbe("none");
+    v.addEventListener("loadedmetadata", ok, { once: true });
+    v.addEventListener("error", bad, { once: true });
+    v.src = EVENT_TAKE.src;
+    if (v.readyState >= 1) ok();
+    return () => {
+      v.removeEventListener("loadedmetadata", ok);
+      v.removeEventListener("error", bad);
+      v.removeAttribute("src");
+    };
   }, []);
 
   /* ── Reloj ── */
@@ -151,7 +176,7 @@ export default function Demo() {
   const useClips = clipProbe === "ok";
   const baked = useClips && INTRUDER.mode !== "overlay";
 
-  const activeClip: keyof typeof EVENT_CLIPS =
+  const activeClip: "idle" | "intruder" | "flee" =
     step === "alert"
       ? "intruder"
       : step === "protocol"
@@ -160,11 +185,13 @@ export default function Demo() {
           : "intruder"
         : "idle";
 
+  // Los tres estados son tramos de la misma toma continua: mismo encuadre,
+  // misma luz, sin salto posible entre pantallas.
   const eventClips: Clip[] | undefined = useClips
     ? [
-        { src: EVENT_CLIPS.idle, active: activeClip === "idle" },
-        { src: EVENT_CLIPS.intruder, active: activeClip === "intruder" },
-        { src: EVENT_CLIPS.flee, active: activeClip === "flee", loop: false },
+        { src: EVENT_TAKE.src, active: activeClip === "idle", ...EVENT_TAKE.idle },
+        { src: EVENT_TAKE.src, active: activeClip === "intruder", ...EVENT_TAKE.intruder },
+        { src: EVENT_TAKE.src, active: activeClip === "flee", loop: false, ...EVENT_TAKE.flee },
       ]
     : undefined;
 
@@ -461,28 +488,6 @@ export default function Demo() {
         </div>
       </Stage>
       </div>
-
-      {/* Sondeo silencioso: sólo pide los metadatos del clip del intruso para
-          saber si el material de video está en public/cams/. Si está, la demo
-          pasa sola a usar video; si no, sigue con la escena de respaldo. */}
-      {INTRUDER.mode !== "overlay" && clipProbe === "pending" && (
-        <video
-          src={EVENT_CLIPS.intruder}
-          preload="metadata"
-          muted
-          playsInline
-          aria-hidden
-          onLoadedMetadata={() => setClipProbe("ok")}
-          onError={() => setClipProbe("none")}
-          style={{
-            position: "absolute",
-            width: 1,
-            height: 1,
-            opacity: 0,
-            pointerEvents: "none",
-          }}
-        />
-      )}
 
       {/* Documento para "Descargar reporte (PDF)". Se monta sólo con el
           reporte abierto, así no precarga los clips de video de fondo. */}

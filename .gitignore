@@ -5,3 +5,6 @@ out
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
+
+# Clips descartados: se quedan en la máquina, no van al repo
+public/cams/_descartes/
