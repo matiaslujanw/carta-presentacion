@@ -32,10 +32,14 @@
 
 html,
 body {
-  background: #000;
+  background: var(--color-void);
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+/* El panel de la central ocupa la pantalla y no scrollea; la presentación sí */
+body.panel-lock {
   overflow: hidden;
 }
 

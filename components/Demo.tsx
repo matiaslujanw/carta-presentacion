@@ -30,6 +30,12 @@ export default function Demo() {
   const m = useDemoMachine();
   const small = useSmallScreen();
 
+  // El panel ocupa la pantalla completa: mientras esté montado, sin scroll.
+  useEffect(() => {
+    document.body.classList.add("panel-lock");
+    return () => document.body.classList.remove("panel-lock");
+  }, []);
+
   // Hasta saber el tamaño no se pinta nada: evita que se vea un layout
   // acomodándose al otro en el primer cuadro.
   if (small === null) return <div className="fixed inset-0 bg-void" />;

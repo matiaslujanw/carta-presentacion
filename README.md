@@ -1,9 +1,8 @@
 # Vig.IA — Demo interactiva del panel de monitoreo con IA
 
-Simulación web del software de la central de monitoreo, para usar en reuniones
-comerciales con consorcios (Zoom o presencial). Reemplaza al prototipo de Figma:
-se comparte por link o QR, se abre en cualquier navegador y el vendedor la maneja
-con clics.
+Presentación interactiva de venta para consorcios, con un caso real de intrusión
+en el perímetro. Reemplaza al prototipo de Figma: se comparte por link o QR, se
+abre en cualquier navegador y el vendedor la maneja con clics.
 
 ## Correr en local
 
@@ -14,21 +13,29 @@ npm run dev
 
 Abre en http://localhost:3000
 
-## El recorrido (4 pantallas)
+## Qué hay en cada URL
 
-1. **Panel general** — grilla de 4 cámaras, feed "IA Operando — No se detectan
-   anomalías". Para avanzar: clic en la **Cam 03** (parpadea sola a los 3 s) o
-   en el indicador "Analítica IA" de la barra superior.
-2. **Alerta de la IA** — la Cam 03 toma el centro, la analítica traza el
-   bounding box sobre el sospechoso y la confianza sube hasta 98 %. Avanza con
-   el botón azul **Iniciar Protocolo de Disuasión Humana**.
-3. **Protocolo y central humana** — cronómetro real 0 → 3 s, micrófono del
-   tótem activo, onda de audio en movimiento y la minuta del operador
-   tipeándose. El sospechoso se retira del cuadro. Avanza con el botón verde
-   **Cerrar Incidente**.
-4. **Reporte al administrador** — pop-up con el mail automático: logo, fecha y
-   hora, tipo de evento, estado y las dos capturas adjuntas.
-   **Finalizar Demostración** reinicia todo para la próxima reunión.
+| Ruta | Qué es |
+|---|---|
+| `/` | **La presentación de venta.** Portada con "Empezar simulación", el caso de intrusión en tres momentos y las tarjetas de cómo actúa la central. Es lo que se manda por link o QR. |
+| `/panel` | El panel completo de la central, con las cuatro cámaras y el recorrido de cuatro hojas. Para el cliente técnico que quiera ver el software. |
+
+### La presentación
+
+1. **Portada** — el consorcio por nombre, una línea de qué se va a ver y el botón.
+2. **La IA detecta** — la Cam 03 con el recuadro sobre el sospechoso, 98% de confianza.
+3. **Responde una persona** — los 3 segundos hasta que habla el operador por el tótem.
+4. **Perímetro despejado** — el sospechoso se retira y el cuadro queda vacío.
+5. **Cómo actuamos** — cuatro tarjetas, el reporte que recibe el administrador y el cierre con WhatsApp.
+
+Una sola página que se acomoda a cualquier pantalla: no hay versión aparte para celular.
+
+### El panel (`/panel`)
+
+Cuatro hojas: panel general → alerta de la IA → protocolo con la central humana →
+reporte automático. En escritorio se usa el panel de 1920x1080 escalado; en
+celular, un recorrido vertical. Las dos vistas consumen el mismo hook
+[`useDemoMachine`](lib/useDemoMachine.ts), así que no se pueden desincronizar.
 
 ## Parámetros de URL
 
@@ -39,17 +46,6 @@ Abre en http://localhost:3000
 | `sello` | `?sello=off` | Oculta el sello "Simulación demostrativa". |
 
 Se combinan: `?consorcio=Barrio Los Nogales&modo=auto`
-
-## Escritorio y celular
-
-La demo tiene dos vistas, no una escalada. En pantallas de más de 820 px de
-ancho se usa el panel de 1920x1080 escalado; abajo de eso —o con menos de
-500 px de alto, que es un celular acostado— se arma un recorrido vertical
-pensado para el pulgar. Es donde más se ve: el QR lo escanean los vecinos.
-
-Las dos consumen el mismo hook [`useDemoMachine`](lib/useDemoMachine.ts), así
-que los pasos, los tiempos y el video son idénticos y no se pueden
-desincronizar. Lo único que cambia es cómo se acomoda en pantalla.
 
 ## El material de cámara
 
