@@ -319,10 +319,12 @@ export default function Presentation() {
               // eslint-disable-next-line jsx-a11y/media-has-caption
               <video
                 src={coverCam.video}
+                poster="/cams/cam1-poster.jpg"
                 autoPlay
                 muted
                 loop
                 playsInline
+                preload="metadata"
                 className="h-full w-full object-cover"
                 style={{ filter: "brightness(0.42) saturate(0.55) blur(2px)" }}
               />

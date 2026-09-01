@@ -57,7 +57,7 @@ funcionan sin conexión.
 La **voz del operador** sí es un archivo, y todavía falta:
 `public/audio/operador.mp3`. Tiene que ser una persona real grabada, no una voz
 sintética: todo el argumento de venta es que del otro lado hay alguien. Ver
-[`public/audio/LEEME.txt`](public/audio/LEEME.txt). Si el archivo no está, la
+[`docs/voz-del-operador.md`](docs/voz-del-operador.md). Si el archivo no está, la
 frase igual se lee en pantalla y el resto del operativo suena normal.
 
 El navegador no deja sonar nada hasta que la persona toca algo, así que el audio
@@ -71,7 +71,7 @@ botón "Activar sonido".
 
 Las cámaras 01, 02 y 03 usan video real generado en Flow; la 04 todavía usa una
 escena vectorial de respaldo. Los archivos y cómo se reemplazan están
-documentados en [`public/cams/LEEME.txt`](public/cams/LEEME.txt).
+documentados en [`docs/material-de-camara.md`](docs/material-de-camara.md).
 
 Lo importante: **la Cam 03 sale de una sola toma continua**
 (`cam3.mp4`). Los tres estados —perímetro vacío, persona merodeando, persona
@@ -91,6 +91,17 @@ de cada paso en modo automático.
 
 Para usar el logo real: copiá el PNG a `public/vigia-logo.png` y poné
 `LOGO_SRC = "/vigia-logo.png"` en `lib/config.ts`.
+
+## Regla de /public
+
+**Todo lo que está en `public/` tiene dirección pública.** No hay carpeta
+privada ahí adentro, y un guión bajo adelante no esconde nada: cualquiera que
+le corte el final a la URL del QR puede pedir el archivo. Las notas internas
+van en [`docs/`](docs/) y el material descartado en `material-crudo/`.
+
+Los mp4 tienen que estar guardados con el índice al principio (*faststart*) o
+el salto por tramos de la Cam 03 llega tarde en conexiones lentas. Si agregás
+un video nuevo, pasale el mismo tratamiento antes de subirlo.
 
 ## Deploy en Vercel
 

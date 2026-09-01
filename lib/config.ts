@@ -7,15 +7,20 @@
  * MATERIAL REAL — cómo se usa:
  * Copiá las fotos a /public/cams/ con estos nombres exactos:
  *
- *   cam1.jpg  → Hall / entrada principal
- *   cam2.jpg  → Cochera / acceso vehicular
- *   cam3.jpg  → Perímetro lateral / reja  (la cámara del evento)
+ *   cam1.mp4  → Hall / entrada principal
+ *   cam2.mp4  → Cochera / acceso vehicular
+ *   cam3.mp4  → Perímetro lateral / reja  (la cámara del evento)
  *   cam4.jpg  → Vereda con el tótem
- *   intruso.png → silueta del sospechoso con fondo transparente (opcional)
  *
- * No hay que tocar código: si el archivo existe se usa la foto, y si no
- * existe la demo cae automáticamente en la escena vectorial de respaldo.
- * También acepta video en loop: seteá `video: "/cams/cam3.mp4"`.
+ * No hay que tocar código: si el archivo existe se usa, y si no existe la demo
+ * cae automáticamente en la escena vectorial de respaldo.
+ *
+ * IMPORTANTE: en /public sólo va lo que la demo usa de verdad. Todo lo que
+ * está ahí queda con dirección pública, así que las notas internas y el
+ * material descartado viven en /docs y /material-crudo.
+ *
+ * Los mp4 tienen que estar guardados con el índice al principio (faststart) o
+ * el salto por tramos de la Cam 03 llega tarde en conexiones lentas.
  */
 
 export const BRAND = {
@@ -98,7 +103,7 @@ export const CAMERAS: Camera[] = [
     // Se filma de día, así que va con corrección nocturna fuerte; la pantalla
     // es emisiva y sigue siendo lo más brillante del cuadro, que es justo el
     // efecto que buscamos.
-    image: "/cams/cam4.png",
+    image: "/cams/cam4.jpg",
     grade: "nightHard",
     focus: "50% 16%",
     zoom: 1.04,
@@ -203,7 +208,12 @@ export const INTRUDER = {
    *             videos en public/cams/ y se acomoda solo.
    */
   mode: "auto" as "auto" | "overlay" | "baked",
-  image: "/cams/intruso.png",
+  /**
+   * PNG recortado del sospechoso, sólo para el modo "overlay".
+   * Vacío a propósito: hoy la persona viene grabada en el video, y apuntar a
+   * un archivo que no existe hacía que la demo pidiera una imagen rota.
+   */
+  image: "",
   figure: { left: 56.5, top: 16, width: 12.5, height: 54 },
   box: { left: 54.5, top: 13, width: 16.5, height: 60 },
   /**

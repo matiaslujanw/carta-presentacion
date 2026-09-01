@@ -426,7 +426,10 @@ function ClipStack({ clips, onAllFailed }: { clips: Clip[]; onAllFailed: () => v
           src={c.src}
           muted
           playsInline
-          preload="auto"
+          // Sólo el tramo activo se precarga entero: los otros dos comparten
+          // el mismo archivo, así que con los metadatos alcanza y no se pide
+          // tres veces lo mismo al abrir la demo.
+          preload={c.active ? "auto" : "metadata"}
           disablePictureInPicture
           onError={() => setFailed((f) => ({ ...f, [i]: true }))}
           className="absolute inset-0 h-full w-full object-cover"
