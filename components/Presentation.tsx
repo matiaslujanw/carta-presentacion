@@ -16,6 +16,7 @@ import CameraTile, { type Clip } from "./CameraTile";
 import Cam3Still from "./Cam3Still";
 import DetectionOverlay from "./DetectionOverlay";
 import Logo from "./Logo";
+import ProductScene, { type ProductSceneKey } from "./ProductScenes";
 import {
   BRAND,
   CAMERAS,
@@ -31,85 +32,145 @@ import {
 /**
  * Presentación de venta.
  *
- * Una portada, la simulación en tres momentos y las tarjetas de cómo actúa la
- * central. Sin barra de menú ni chrome de software: la idea es que un vecino
- * entienda el operativo en cuarenta segundos, desde el celular.
+ * Sigue el guion aprobado, escena por escena: la portada, el caso de intrusión
+ * de la madrugada en tres momentos, el paso a paso de cómo actúa la central, el
+ * reporte que le llega al administrador y las cuatro escenas del servicio de
+ * todos los días (accesos, tótem, cocheras y trazabilidad).
+ *
+ * Sin barra de menú ni chrome de software: se avanza con un botón por escena,
+ * así el vendedor maneja el ritmo desde el celular.
  *
  * El panel completo de la central vive aparte, en /panel.
  */
 
-type Scene = "cover" | "deteccion" | "disuasion" | "despejado" | "tarjetas";
+type Scene =
+  | "cover" // Escena 1 — portada
+  | "deteccion" // Escena 2 — la IA detecta el merodeo
+  | "disuasion" // Escena 3 — el operador habla por el altoparlante
+  | "despejado" // Escena 4 — perímetro despejado
+  | "pasos" // Escena 5 — el paso a paso, 01 a 04
+  | "reporte" // Reporte al administrador
+  | "accesos" // Escena 6 — control de acceso biométrico
+  | "totem" // Escena 7 — Tótem IA
+  | "lpr" // Escena 8 — cocheras con cámara LPR
+  | "trazabilidad" // Escena 9 — trazabilidad de registros
+  | "cierre"; // Cierre — relevamiento sin cargo
 
-const ORDER: Scene[] = ["cover", "deteccion", "disuasion", "despejado", "tarjetas"];
+const ORDER: Scene[] = [
+  "cover",
+  "deteccion",
+  "disuasion",
+  "despejado",
+  "pasos",
+  "reporte",
+  "accesos",
+  "totem",
+  "lpr",
+  "trazabilidad",
+  "cierre",
+];
 
-/** Cuánto dura cada momento en modo automático, para el QR */
+/** Número de escena del guion. El reporte y el cierre no llevan número propio. */
+const SCENE_NUM: Record<Scene, string> = {
+  cover: "01",
+  deteccion: "02",
+  disuasion: "03",
+  despejado: "04",
+  pasos: "05",
+  reporte: "05",
+  accesos: "06",
+  totem: "07",
+  lpr: "08",
+  trazabilidad: "09",
+  cierre: "09",
+};
+
+/** Cuánto dura cada escena en modo automático, para el QR */
 const AUTO_MS: Record<Scene, number> = {
-  cover: 4500,
+  cover: 5000,
   deteccion: 8000,
   disuasion: 9000,
   despejado: 7000,
-  tarjetas: 14000,
+  pasos: 13000,
+  reporte: 8000,
+  accesos: 10000,
+  totem: 13000,
+  lpr: 9000,
+  trazabilidad: 9000,
+  cierre: 10000,
+};
+
+/** Textos de avance, tal como los pide el guion */
+const CTA: Record<Scene, string> = {
+  cover: "Ver demo",
+  deteccion: "¿Y ahora qué pasa?",
+  disuasion: "¿Qué hace el sospechoso?",
+  despejado: "Paso a paso",
+  pasos: "Reporte al administrador",
+  reporte: "Vigilancia 24/7",
+  accesos: "Tótem IA",
+  totem: "Acceso a cocheras",
+  lpr: "Trazabilidad de registros",
+  trazabilidad: "Cómo seguimos",
+  cierre: "",
 };
 
 const BEATS: Record<
   "deteccion" | "disuasion" | "despejado",
-  { tag: string; hora: string; titulo: string; texto: string; cita?: string; cta: string }
+  { tag: string; hora: string; titulo: string; texto: string; cita?: string }
 > = {
   deteccion: {
     tag: "La IA detecta",
     hora: "03:14:22",
-    titulo: "Alguien está merodeando la reja",
+    titulo: "Una persona es detectada por la IA merodeando una zona prohibida",
     texto:
       "La analítica de video lo marca sola, con 98% de confianza. Nadie en el edificio se enteró todavía, y no sonó ninguna sirena.",
-    cta: "¿Y ahora qué pasa?",
   },
   disuasion: {
     tag: "Responde una persona",
     hora: "03:14:25",
-    titulo: "Tres segundos después hay un operador mirando",
+    titulo: "Solo 3 segundos después, un operador recibe el alerta por imagen en vivo",
     texto:
-      "No es un robot: es alguien de la central que ve la misma imagen y le habla por el altoparlante del tótem.",
+      "No es un robot: es un guardia que ve la imagen en vivo y actúa según protocolo establecido. En este caso emite un mensaje al intruso mediante altavoz.",
     cita: "Usted está siendo filmado y la policía está en camino. Retírese del perímetro inmediatamente.",
-    cta: "Ver qué hace el sospechoso",
   },
   despejado: {
     tag: "Se va",
     hora: "03:14:31",
     titulo: "Perímetro despejado",
     texto:
-      "Se retiró solo. Sin daños, sin patrullero, sin que nadie del consorcio se despertara. A la mañana el administrador tiene el reporte en su correo.",
-    cta: "Cómo actuamos, paso a paso",
+      "El intruso se retira del lugar sin lograr su cometido y sin emitir alerta a todo el consorcio en la madrugada. A la mañana siguiente, el administrador tiene en su correo el reporte completo de lo acontecido.",
   },
 };
 
 const PASOS = [
   {
     n: "01",
-    titulo: "La IA vigila sin parar",
+    titulo: "La IA vigila sin descanso",
     texto:
-      "La analítica mira las cámaras del consorcio las 24 horas y marca lo que se sale de lo normal: alguien merodeando, alguien donde no debería estar, a la hora que no corresponde.",
-    pie: "Analítica de video · 4 cámaras + tótem",
+      "La analítica observa las cámaras del consorcio durante las 24 horas del día, los 365 días del año, y emite las alertas predeterminadas: alguien merodeando, alguien detectado en una zona roja o un horario no habitual.",
+    pie: "Analítica de video — cámaras + Tótem IA",
   },
   {
     n: "02",
-    titulo: "Una persona verifica en 3 segundos",
+    titulo: "Un operador verifica el alerta en solo 3 segundos",
     texto:
-      "Acá está la diferencia. Un operador real abre la imagen y decide. Por eso el consorcio no recibe alarmas a las tres de la mañana cada vez que pasa un gato.",
-    pie: "Central de Monitoreo Vig.IA — NOA",
+      "Acá está la diferencia. El operador abre la imagen en vivo y actúa según protocolo. Esto evita que todo el consorcio reciba falsas alertas.",
+    pie: "Central de Monitoreo Vig.IA",
   },
   {
     n: "03",
-    titulo: "El tótem habla",
+    titulo: "Emisión de alerta",
     texto:
-      "El operador emite audio en vivo por el altoparlante del tótem. La mayoría se va antes de intentar nada: saber que hay alguien mirando y hablando es lo que disuade.",
-    pie: "Audio disuasivo en vivo · 92 dB",
+      "El operador emite un audio en vivo por altoparlante. El intruso desiste de su actitud y se retira del lugar: sabe que lo están filmando y que están llamando al 911.",
+    pie: "Audio disuasivo en vivo",
   },
   {
     n: "04",
-    titulo: "El administrador recibe todo",
+    titulo: "Informe detallado al consorcio",
     texto:
-      "Reporte automático por correo con la hora, el tipo de evento, la evidencia en video y la minuta completa de lo que hizo el operador. Sin pedirlo.",
-    pie: "Reporte automático · cada evento",
+      "El administrador recibe en su correo electrónico un informe detallado de lo acontecido, con la hora, el tipo de evento, la evidencia de video y la minuta del protocolo de actuación.",
+    pie: "Reporte automático",
   },
 ];
 
@@ -159,16 +220,22 @@ export default function Presentation() {
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [isLocal, setIsLocal] = useState(false);
 
-  // En pantalla chica la etiqueta de la IA va en versión corta: la larga se
-  // monta encima del rótulo de la cámara.
+  // La etiqueta larga de la IA ("CLASE: PERSONA · TRACK ID · Merodeo
+  // sospechoso…") necesita unos 700 px de cuadro. Con menos se monta encima del
+  // rótulo de la cámara, así que va en versión corta.
+  //
+  // Se mide el cuadro y no la ventana: en escritorio la cámara comparte la fila
+  // con el relato, así que una ventana grande no significa un cuadro grande.
+  const camBoxRef = useRef<HTMLDivElement>(null);
   const [narrow, setNarrow] = useState(false);
+  const isBeatScene = scene === "deteccion" || scene === "disuasion" || scene === "despejado";
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 720px)");
-    const sync = () => setNarrow(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
+    const el = camBoxRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setNarrow(entry.contentRect.width < 700));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [isBeatScene]);
 
   useEffect(() => {
     void probeVoice().then(setHasVoice);
@@ -287,7 +354,7 @@ export default function Presentation() {
   useEffect(() => {
     if (!auto) return;
     const id = setTimeout(() => {
-      if (scene === "tarjetas") restart();
+      if (scene === "cierre") restart();
       else next();
     }, AUTO_MS[scene]);
     return () => clearTimeout(id);
@@ -295,7 +362,11 @@ export default function Presentation() {
 
   /* ── Tramo del clip según el momento ── */
   const activeRange =
-    scene === "despejado" ? "flee" : scene === "cover" ? "idle" : "intruder";
+    scene === "despejado"
+      ? "flee"
+      : scene === "deteccion" || scene === "disuasion"
+        ? "intruder"
+        : "idle";
   const clips: Clip[] | undefined = clipsOk
     ? [
         { src: EVENT_TAKE.src, active: activeRange === "idle", ...EVENT_TAKE.idle },
@@ -306,7 +377,78 @@ export default function Presentation() {
 
   const isBeat = scene === "deteccion" || scene === "disuasion" || scene === "despejado";
   const beat = isBeat ? BEATS[scene] : null;
+  const isProduct =
+    scene === "accesos" || scene === "totem" || scene === "lpr" || scene === "trazabilidad";
   const stepIndex = ORDER.indexOf(scene);
+  const progress = stepIndex / (ORDER.length - 1);
+
+  /* ── Chrome compartido por todas las escenas menos la portada ──
+     Logo, sonido y avance del guion. Está una sola vez para que no se pueda
+     desincronizar entre escenas. */
+  const header = (
+    // En modo automático la barra fija del QR se apoya arriba: se le hace lugar.
+    <header className={`flex items-center gap-4 px-4 py-4 sm:px-8 ${auto ? "pt-9" : ""}`}>
+      <button onClick={restart} aria-label="Volver al inicio" className="shrink-0">
+        <Logo size="sm" />
+      </button>
+
+      <button
+        onClick={() => {
+          if (!audioUnlocked) enableAudio();
+          else {
+            stopVoice();
+            setSound((v) => !v);
+          }
+        }}
+        aria-label={sound && audioUnlocked ? "Silenciar" : "Activar sonido"}
+        className={`ml-auto flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors ${
+          sound && audioUnlocked
+            ? "border-gold/40 bg-golddim/40 text-goldhi"
+            : "border-line2 text-muted hover:bg-white/[0.05]"
+        }`}
+      >
+        {sound && audioUnlocked ? (
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
+            <path d="M4 9v6h3.5L12 18.5v-13L7.5 9H4Z" />
+            <path d="M16 9.5a3.5 3.5 0 0 1 0 5M18.5 7a7 7 0 0 1 0 10" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
+            <path d="M4 9v6h3.5L12 18.5v-13L7.5 9H4Z" />
+            <path d="m16.5 10 4 4m0-4-4 4" />
+          </svg>
+        )}
+        <span className="hidden sm:inline">{sound && audioUnlocked ? "Sonido" : "Activar sonido"}</span>
+      </button>
+
+      {/* Avance del guion */}
+      <div className="flex shrink-0 items-center gap-2.5">
+        <div className="h-1 w-16 overflow-hidden rounded-full bg-line2 sm:w-28">
+          <div
+            className="h-full rounded-full bg-gold transition-[width] duration-500 ease-out"
+            style={{ width: `${Math.max(6, progress * 100)}%` }}
+          />
+        </div>
+        <span className="font-mono text-[11px] text-muted tabular-nums">
+          {SCENE_NUM[scene]}
+          <span className="text-faint"> / 09</span>
+        </span>
+      </div>
+    </header>
+  );
+
+  /** Botón de avance. El texto lo pone el guion, en CTA. */
+  const avanzar = (
+    <button
+      onClick={next}
+      className="mt-7 flex w-full items-center justify-center gap-3 rounded-2xl bg-gold px-7 py-4.5 text-[17px] font-bold text-black transition-all hover:brightness-110 sm:w-auto"
+    >
+      {CTA[scene]}
+      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+        <path d="M13 5l7 7-7 7v-4H4v-6h9z" />
+      </svg>
+    </button>
+  );
 
   return (
     <div ref={topRef} className="min-h-[100dvh] bg-void text-ink">
@@ -332,41 +474,44 @@ export default function Presentation() {
             <div className="absolute inset-0 bg-gradient-to-b from-void/70 via-void/80 to-void" />
           </div>
 
-          <div className="relative z-10 flex flex-1 flex-col px-6 py-8 sm:px-10">
-            <Logo size="md" />
+          <div className="relative z-10 flex flex-1 flex-col items-center px-6 py-8 text-center sm:px-10">
+            <div className="flex flex-1 flex-col items-center justify-center py-10">
+              {/* El guion pide la marca grande y al centro */}
+              <Logo size="xl" />
 
-            <div className="flex flex-1 flex-col justify-center py-10">
-              <p className="text-[12px] font-semibold tracking-[0.2em] text-goldhi uppercase">
+              <p className="mt-10 text-[12px] font-semibold tracking-[0.2em] text-goldhi uppercase">
                 Consorcio {consorcio}
               </p>
-              <h1 className="mt-4 max-w-[16ch] text-[clamp(34px,8vw,64px)] leading-[1.02] font-bold tracking-tight text-balance">
-                Así cuidamos su edificio a las <span className="text-goldhi">3 de la mañana</span>.
+              <h1 className="mt-4 max-w-[22ch] text-[clamp(28px,6.6vw,54px)] leading-[1.06] font-bold tracking-tight text-balance uppercase">
+                Bienvenidos a la nueva era de la <span className="text-goldhi">seguridad</span>
               </h1>
-              <p className="mt-5 max-w-[52ch] text-[clamp(16px,2.4vw,20px)] leading-relaxed text-ink2">
-                Una simulación de un minuto con un caso real de intrusión en el perímetro: qué ve
-                la inteligencia artificial, qué hace nuestra central y qué recibe el administrador.
+              <p className="mt-5 max-w-[46ch] text-[clamp(16px,2.4vw,20px)] leading-relaxed text-ink2">
+                Servicio de Vigilancia Inteligente 24/7 para Consorcios.
+              </p>
+              <p className="mt-3 max-w-[46ch] text-[clamp(14px,2vw,17px)] leading-relaxed text-muted">
+                Situación de caso de intrusión real a las 03:00 AM.
               </p>
 
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <button
-                  onClick={() => {
-                    enableAudio();
-                    go("deteccion");
-                  }}
-                  className="cta-glow flex items-center justify-center gap-3 rounded-2xl bg-gold px-8 py-5 text-[18px] font-bold text-black transition-all hover:brightness-110"
-                >
-                  Empezar simulación
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => go("tarjetas")}
-                  className="rounded-2xl border border-line2 px-6 py-5 text-[16px] font-semibold text-ink2 transition-colors hover:bg-white/[0.05]"
-                >
-                  Ver cómo actuamos
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  enableAudio();
+                  go("deteccion");
+                }}
+                className="cta-glow mt-9 flex items-center justify-center gap-3 rounded-2xl bg-gold px-10 py-5 text-[18px] font-bold text-black transition-all hover:brightness-110"
+              >
+                Ver demo
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </button>
+
+              {/* Atajo para el vendedor que ya mostró el caso y va al servicio */}
+              <button
+                onClick={() => go("accesos")}
+                className="mt-5 text-[14px] font-semibold text-muted underline decoration-line2 underline-offset-4 transition-colors hover:text-ink2"
+              >
+                Ir directo al servicio de todos los días
+              </button>
             </div>
 
             <p className="text-[12px] text-muted">
@@ -380,68 +525,33 @@ export default function Presentation() {
       {/* ══════════ SIMULACIÓN ══════════ */}
       {isBeat && beat && (
         <section className="flex min-h-[100dvh] flex-col">
-          <header className="flex items-center gap-4 px-4 py-4 sm:px-8">
-            <Logo size="sm" />
-            <button
-              onClick={() => {
-                if (!audioUnlocked) enableAudio();
-                else {
-                  stopVoice();
-                  setSound((v) => !v);
-                }
-              }}
-              aria-label={sound && audioUnlocked ? "Silenciar" : "Activar sonido"}
-              className={`ml-auto flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors ${
-                sound && audioUnlocked
-                  ? "border-gold/40 bg-golddim/40 text-goldhi"
-                  : "border-line2 text-muted hover:bg-white/[0.05]"
-              }`}
-            >
-              {sound && audioUnlocked ? (
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
-                  <path d="M4 9v6h3.5L12 18.5v-13L7.5 9H4Z" />
-                  <path d="M16 9.5a3.5 3.5 0 0 1 0 5M18.5 7a7 7 0 0 1 0 10" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
-                  <path d="M4 9v6h3.5L12 18.5v-13L7.5 9H4Z" />
-                  <path d="m16.5 10 4 4m0-4-4 4" />
-                </svg>
-              )}
-              {sound && audioUnlocked ? "Sonido" : "Activar sonido"}
-            </button>
-            <div className="flex items-center gap-2">
-              {(["deteccion", "disuasion", "despejado"] as const).map((s, i) => (
-                <span
-                  key={s}
-                  className={`h-1.5 rounded-full transition-all duration-500 ${
-                    ORDER.indexOf(s) <= stepIndex ? "w-7 bg-gold" : "w-3 bg-line2"
-                  }`}
-                />
-              ))}
-            </div>
-          </header>
+          {header}
 
-          <div className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col justify-center gap-6 px-4 pb-8 sm:px-8">
-            <CameraTile
-              camera={eventCam}
-              clock={beat.hora}
-              state={scene === "despejado" ? "cleared" : "alert"}
-              clips={clips}
-              onClipsFailed={() => setClipsOk(false)}
-              className="aspect-video w-full overflow-hidden rounded-xl"
-            >
-              {scene !== "despejado" && (
-                <DetectionOverlay
-                  phase="lurking"
-                  showBox
-                  confidence={confidence}
-                  compact={narrow}
-                  showFigure={!clipsOk}
-                  box={clipsOk ? INTRUDER.boxBaked : INTRUDER.box}
-                />
-              )}
-            </CameraTile>
+          {/* En celular la cámara va arriba del relato. Desde tablet, al costado:
+              si no, el mensaje del operador y el botón caen abajo del pliegue,
+              y el vendedor tiene que scrollear en medio de la escena. */}
+          <div className="mx-auto grid w-full max-w-[1100px] flex-1 content-center gap-6 px-4 pb-8 sm:px-8 md:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] md:items-center md:gap-8">
+            <div ref={camBoxRef}>
+              <CameraTile
+                camera={eventCam}
+                clock={beat.hora}
+                state={scene === "despejado" ? "cleared" : "alert"}
+                clips={clips}
+                onClipsFailed={() => setClipsOk(false)}
+                className="aspect-video w-full overflow-hidden rounded-xl"
+              >
+                {scene !== "despejado" && (
+                  <DetectionOverlay
+                    phase="lurking"
+                    showBox
+                    confidence={confidence}
+                    compact={narrow}
+                    showFigure={!clipsOk}
+                    box={clipsOk ? INTRUDER.boxBaked : INTRUDER.box}
+                  />
+                )}
+              </CameraTile>
+            </div>
 
             <div>
               <div className="flex items-center gap-2.5">
@@ -460,7 +570,7 @@ export default function Presentation() {
                 <span className="font-mono text-[12px] text-muted">{beat.hora}</span>
               </div>
 
-              <h2 className="mt-3 max-w-[20ch] text-[clamp(24px,4.6vw,40px)] leading-[1.1] font-bold tracking-tight text-balance">
+              <h2 className="mt-3 max-w-[26ch] text-[clamp(23px,4.2vw,38px)] leading-[1.08] font-bold tracking-tight text-balance uppercase">
                 {beat.titulo}
               </h2>
               <p className="mt-3 max-w-[60ch] text-[clamp(15px,2.1vw,19px)] leading-relaxed text-ink2">
@@ -511,70 +621,72 @@ export default function Presentation() {
                 </div>
               )}
 
-              <button
-                onClick={next}
-                className="mt-7 flex w-full items-center justify-center gap-3 rounded-2xl bg-gold px-7 py-4.5 text-[17px] font-bold text-black transition-all hover:brightness-110 sm:w-auto"
-              >
-                {beat.cta}
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-                  <path d="M13 5l7 7-7 7v-4H4v-6h9z" />
-                </svg>
-              </button>
+              {avanzar}
             </div>
           </div>
         </section>
       )}
 
-      {/* ══════════ CÓMO ACTUAMOS ══════════ */}
-      {scene === "tarjetas" && (
-        <section className="mx-auto w-full max-w-[1100px] px-4 py-8 sm:px-8 sm:py-12">
-          <header className="flex items-center gap-4 pb-8">
-            <Logo size="sm" />
-          </header>
+      {/* ══════════ ESCENA 5 · PASO A PASO ══════════ */}
+      {scene === "pasos" && (
+        <section className="flex min-h-[100dvh] flex-col">
+          {header}
 
-          <p className="text-[12px] font-semibold tracking-[0.2em] text-goldhi uppercase">
-            Cómo actuamos
-          </p>
-          <h2 className="mt-3 max-w-[18ch] text-[clamp(28px,5.4vw,48px)] leading-[1.05] font-bold tracking-tight text-balance">
-            Cuatro pasos, y uno de ellos lo hace una persona.
-          </h2>
-          <p className="mt-4 max-w-[58ch] text-[clamp(15px,2.1vw,19px)] leading-relaxed text-ink2">
-            La inteligencia artificial detecta. La decisión, siempre, la toma alguien de nuestra
-            central. Eso es lo que evita las falsas alarmas y lo que hace que el sospechoso se
-            vaya antes de intentar nada.
-          </p>
+          <div className="mx-auto w-full max-w-[1100px] px-4 pb-10 sm:px-8">
+            <p className="text-[12px] font-semibold tracking-[0.2em] text-goldhi uppercase">
+              Escena 5
+            </p>
+            <h2 className="mt-3 max-w-[18ch] text-[clamp(26px,5vw,44px)] leading-[1.05] font-bold tracking-tight text-balance uppercase">
+              Paso a paso
+            </h2>
+            <p className="mt-3.5 max-w-[58ch] text-[clamp(15px,2.1vw,19px)] leading-relaxed text-ink2">
+              La inteligencia artificial detecta. La decisión, siempre, la toma alguien de nuestra
+              central. Eso es lo que evita las falsas alarmas y lo que hace que el sospechoso se
+              vaya antes de intentar nada.
+            </p>
 
-          <div className="mt-9 grid gap-4 sm:grid-cols-2">
-            {PASOS.map((p) => (
-              <article
-                key={p.n}
-                className="rounded-2xl border border-line bg-panel p-6 transition-colors hover:border-gold/30"
-              >
-                <span className="font-mono text-[13px] font-bold text-gold">{p.n}</span>
-                <h3 className="mt-2 text-[19px] leading-tight font-bold tracking-tight">
-                  {p.titulo}
-                </h3>
-                <p className="mt-2.5 text-[14.5px] leading-relaxed text-ink2">{p.texto}</p>
-                <p className="mt-4 border-t border-line pt-3 font-mono text-[11.5px] text-muted">
-                  {p.pie}
-                </p>
-              </article>
-            ))}
+            <div className="mt-7 grid gap-3.5 sm:grid-cols-2">
+              {PASOS.map((p) => (
+                <article
+                  key={p.n}
+                  className="rounded-2xl border border-line bg-panel p-6 transition-colors hover:border-gold/30"
+                >
+                  <span className="font-mono text-[13px] font-bold text-gold">{p.n}</span>
+                  <h3 className="mt-2 text-[19px] leading-tight font-bold tracking-tight">
+                    {p.titulo}
+                  </h3>
+                  <p className="mt-2.5 text-[14.5px] leading-relaxed text-ink2">{p.texto}</p>
+                  <p className="mt-4 border-t border-line pt-3 font-mono text-[11.5px] tracking-wide text-muted uppercase">
+                    [{p.pie}]
+                  </p>
+                </article>
+              ))}
+            </div>
+
+            {avanzar}
           </div>
+        </section>
+      )}
 
-          {/* La evidencia que le llega al administrador */}
-          <div className="mt-10 rounded-2xl border border-line bg-panel p-6">
-            <p className="text-[12px] font-semibold tracking-[0.18em] text-goldhi uppercase">
+      {/* ══════════ REPORTE AL ADMINISTRADOR ══════════ */}
+      {scene === "reporte" && (
+        <section className="flex min-h-[100dvh] flex-col">
+          {header}
+
+          <div className="mx-auto w-full max-w-[1100px] px-4 pb-10 sm:px-8">
+            <p className="text-[12px] font-semibold tracking-[0.2em] text-goldhi uppercase">
               Lo que recibe el administrador
             </p>
-            <h3 className="mt-2 text-[22px] font-bold tracking-tight">
-              {REPORT.status}
-            </h3>
-            <p className="mt-2 max-w-[56ch] text-[14.5px] leading-relaxed text-ink2">
+            <h2 className="mt-3 max-w-[20ch] text-[clamp(26px,5vw,44px)] leading-[1.05] font-bold tracking-tight text-balance uppercase">
+              Reporte al administrador
+            </h2>
+            <p className="mt-4 max-w-[58ch] text-[clamp(15px,2.1vw,19px)] leading-relaxed text-ink2">
               Un correo automático con la hora exacta, el tipo de evento, la clasificación del
-              operador y las capturas del antes y el después. Sin pedirlo y sin costo adicional.
+              operador, la evidencia de video y las capturas del antes y el después. Sin pedirlo y
+              sin costo adicional.
             </p>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+
+            <div className="mt-6 grid gap-3.5 sm:grid-cols-2">
               <figure className="overflow-hidden rounded-xl border border-line bg-black">
                 <Cam3Still uid="pres-a" kind="intruder" time="03:14:22" />
                 <figcaption className="border-t border-line bg-elev px-3 py-2 text-[12px] text-muted">
@@ -588,102 +700,79 @@ export default function Presentation() {
                 </figcaption>
               </figure>
             </div>
+
+            <dl className="mt-3.5 grid gap-3 sm:grid-cols-4">
+              {[
+                ["Caso", REPORT.caseId],
+                ["Tipo de evento", REPORT.eventType],
+                ["Protocolo aplicado", REPORT.protocol],
+                ["Estado", REPORT.status],
+              ].map(([k, v]) => (
+                <div key={k} className="rounded-xl border border-line bg-panel px-4 py-3">
+                  <dt className="text-[11px] font-semibold tracking-[0.16em] text-muted uppercase">
+                    {k}
+                  </dt>
+                  <dd className="mt-1.5 text-[14.5px] leading-snug font-semibold text-ink">{v}</dd>
+                </div>
+              ))}
+            </dl>
+
+            {avanzar}
           </div>
+        </section>
+      )}
 
-          {/* Lo que el consorcio usa todos los días */}
-          <div className="mt-10">
-            <p className="text-[12px] font-semibold tracking-[0.18em] text-goldhi uppercase">
-              Todos los días, no sólo de noche
-            </p>
-            <h3 className="mt-2 max-w-[20ch] text-[clamp(22px,3.8vw,34px)] leading-tight font-bold tracking-tight text-balance">
-              El tótem también es la puerta.
-            </h3>
-            <p className="mt-3 max-w-[58ch] text-[15px] leading-relaxed text-ink2">
-              La intrusión de la madrugada pasa una vez cada tanto. El control de accesos lo usa
-              cada vecino, todos los días, y es donde más se nota que el edificio está cuidado.
-            </p>
+      {/* ══════════ ESCENAS 6 A 9 · EL SERVICIO DE TODOS LOS DÍAS ══════════ */}
+      {isProduct && (
+        <section className="flex min-h-[100dvh] flex-col">
+          {header}
 
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <article className="overflow-hidden rounded-2xl border border-line bg-panel">
-                <div className="aspect-[16/10] w-full overflow-hidden bg-black">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/accesos/ingreso-peatonal.jpg"
-                    alt="Una vecina frente al tótem, que la reconoce y le abre la puerta"
-                    className="h-full w-full object-cover"
-                    style={{ objectPosition: "45% 52%" }}
-                    loading="lazy"
-                  />
-                </div>
-                <div className="p-5">
-                  <h4 className="text-[18px] leading-tight font-bold tracking-tight">
-                    El vecino entra con la cara
-                  </h4>
-                  <p className="mt-2 text-[14.5px] leading-relaxed text-ink2">
-                    Se para frente al tótem y la puerta se abre. Sin llave que se pierda, sin
-                    tarjeta que se preste y sin código que termine circulando por WhatsApp. Y queda
-                    registrado quién entró y a qué hora.
-                  </p>
-                </div>
-              </article>
+          <div className="mx-auto w-full max-w-[1100px] px-4 pb-10 sm:px-8">
+            <ProductScene scene={scene as ProductSceneKey} />
+            {avanzar}
+          </div>
+        </section>
+      )}
 
-              <article className="overflow-hidden rounded-2xl border border-line bg-panel">
-                <div className="aspect-[16/10] w-full overflow-hidden bg-black">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/accesos/ingreso-vehicular.jpg"
-                    alt="Un auto en la entrada de la cochera: la cámara lee la patente y el portón se abre"
-                    className="h-full w-full object-cover"
-                    style={{ objectPosition: "48% 58%" }}
-                    loading="lazy"
-                  />
-                </div>
-                <div className="p-5">
-                  <h4 className="text-[18px] leading-tight font-bold tracking-tight">
-                    El portón lee la patente
-                  </h4>
-                  <p className="mt-2 text-[14.5px] leading-relaxed text-ink2">
-                    El auto llega, la cámara lee la patente y el portón se abre solo. Nadie baja la
-                    ventanilla de noche ni queda esperando en la vereda con el motor prendido, que
-                    es justo el momento en que a la gente la sorprenden.
-                  </p>
-                </div>
-              </article>
+      {/* ══════════ CIERRE ══════════ */}
+      {scene === "cierre" && (
+        <section className="flex min-h-[100dvh] flex-col">
+          {header}
+
+          <div className="mx-auto flex w-full max-w-[760px] flex-1 flex-col items-center justify-center px-4 pb-10 text-center sm:px-8">
+            <Logo size="xl" />
+
+            <h2 className="mt-10 max-w-[24ch] text-[clamp(22px,4.4vw,38px)] leading-[1.1] font-bold tracking-tight text-balance uppercase">
+              Tecnología de vanguardia para tu <span className="text-goldhi">seguridad</span>
+            </h2>
+
+            <div className="mt-8 w-full rounded-2xl border border-gold/30 bg-golddim/25 p-7">
+              <h3 className="max-w-[26ch] mx-auto text-[clamp(19px,3.2vw,28px)] leading-tight font-bold tracking-tight text-balance uppercase">
+                Hacemos el relevamiento de tu edificio sin cargo
+              </h3>
+              <p className="mt-3 text-[15px] leading-relaxed text-ink2">
+                Vamos al Consorcio {consorcio}, lo recorremos y les decimos exactamente dónde
+                conviene poner cada cámara y el tótem.
+              </p>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+                <a
+                  href={`https://wa.me/${BRAND.phone.replace(/[^0-9]/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2.5 rounded-2xl bg-gold px-7 py-4 text-[16px] font-bold text-black transition-all hover:brightness-110"
+                >
+                  Hablar por WhatsApp
+                </a>
+                <button
+                  onClick={restart}
+                  className="rounded-2xl border border-line2 px-6 py-4 text-[15px] font-semibold text-ink2 transition-colors hover:bg-white/[0.05]"
+                >
+                  Volver a ver la demo
+                </button>
+              </div>
             </div>
 
-            <p className="mt-4 max-w-[58ch] text-[13.5px] leading-relaxed text-muted">
-              Cada ingreso queda en el mismo registro que ve el administrador, junto a los eventos
-              de seguridad. Si mañana hay una discusión sobre quién entró a las 2 de la mañana, la
-              respuesta está ahí.
-            </p>
-          </div>
-
-          {/* Cierre */}
-          <div className="mt-10 rounded-2xl border border-gold/30 bg-golddim/25 p-7">
-            <h3 className="max-w-[22ch] text-[clamp(21px,3.4vw,30px)] leading-tight font-bold tracking-tight text-balance">
-              ¿Lo llevamos al Consorcio {consorcio}?
-            </h3>
-            <p className="mt-3 max-w-[52ch] text-[15px] leading-relaxed text-ink2">
-              Hacemos un relevamiento del edificio sin cargo y les decimos exactamente dónde
-              conviene poner cada cámara y el tótem.
-            </p>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <a
-                href={`https://wa.me/${BRAND.phone.replace(/[^0-9]/g, "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2.5 rounded-2xl bg-gold px-7 py-4 text-[16px] font-bold text-black transition-all hover:brightness-110"
-              >
-                Hablar por WhatsApp
-              </a>
-              <button
-                onClick={restart}
-                className="rounded-2xl border border-line2 px-6 py-4 text-[15px] font-semibold text-ink2 transition-colors hover:bg-white/[0.05]"
-              >
-                Volver a ver la simulación
-              </button>
-            </div>
-            <p className="mt-5 text-[12.5px] text-muted">
+            <p className="mt-6 text-[12.5px] leading-relaxed text-muted">
               {BRAND.central} · {BRAND.phone} · {BRAND.email}
               {sello && " · Simulación demostrativa"}
             </p>
@@ -712,8 +801,10 @@ export default function Presentation() {
           <span className="text-[10px] font-semibold tracking-[0.16em] text-goldhi uppercase">
             Reproducción automática
           </span>
+          {/* La misma numeración del encabezado: si acá dijera "4 / 11" y
+              arriba "03 / 09", el vecino no sabe cuál mirar. */}
           <span className="ml-auto font-mono text-[10px] text-muted">
-            {stepIndex + 1} / {ORDER.length}
+            Escena {SCENE_NUM[scene]} / 09
           </span>
         </div>
       )}

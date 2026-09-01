@@ -17,18 +17,42 @@ Abre en http://localhost:3000
 
 | Ruta | Qué es |
 |---|---|
-| `/` | **La presentación de venta.** Portada con "Empezar simulación", el caso de intrusión en tres momentos y las tarjetas de cómo actúa la central. Es lo que se manda por link o QR. |
+| `/` | **La presentación de venta.** Las nueve escenas del guion, una por pantalla, con un botón para avanzar. Es lo que se manda por link o QR. |
 | `/panel` | El panel completo de la central, con las cuatro cámaras y el recorrido de cuatro hojas. Para el cliente técnico que quiera ver el software. |
 
 ### La presentación
 
-1. **Portada** — el consorcio por nombre, una línea de qué se va a ver y el botón.
-2. **La IA detecta** — la Cam 03 con el recuadro sobre el sospechoso, 98% de confianza.
-3. **Responde una persona** — los 3 segundos hasta que habla el operador por el tótem.
-4. **Perímetro despejado** — el sospechoso se retira y el cuadro queda vacío.
-5. **Cómo actuamos** — cuatro tarjetas, el reporte que recibe el administrador y el cierre con WhatsApp.
+Sigue el guion aprobado escena por escena. Son once pantallas para nueve escenas
+numeradas: el reporte y el cierre no llevan número propio.
 
-Una sola página que se acomoda a cualquier pantalla: no hay versión aparte para celular.
+| # | Escena | Qué se ve |
+|---|---|---|
+| 01 | Portada | La marca al centro, "Bienvenidos a la nueva era de la seguridad" y el botón **Ver demo**. |
+| 02 | La IA detecta | La Cam 03 con el recuadro sobre el sospechoso, 98% de confianza. |
+| 03 | Responde una persona | Los 3 segundos hasta que habla el operador por el altoparlante del tótem. |
+| 04 | Perímetro despejado | El sospechoso se retira y el cuadro queda vacío. |
+| 05 | Paso a paso | Las cuatro tarjetas 01→04 de cómo actúa la central. |
+| — | Reporte al administrador | Las capturas del antes y el después, más los datos del caso. |
+| 06 | Control de acceso biométrico | Rostro, palma y código numérico. |
+| 07 | Tótem IA | La pantalla de 47" con el operador, las cámaras del consorcio, los botones de pánico y las notificaciones del administrador. |
+| 08 | Acceso a cocheras con cámara LPR | El portón lee la patente y se abre solo. |
+| 09 | Trazabilidad de registros | El registro del día, sellado, con el plazo de guarda por contrato. |
+| — | Cierre | "Tecnología de vanguardia para tu seguridad" y el relevamiento sin cargo. |
+
+Las escenas 1 a 5 más el reporte viven en
+[`Presentation.tsx`](components/Presentation.tsx); las 6 a 9, en
+[`ProductScenes.tsx`](components/ProductScenes.tsx). Los textos de venta están al
+principio de cada archivo, no repartidos por el JSX.
+
+**Cada escena entra en una pantalla, sin scroll.** Es la razón por la que en
+celular todo se apila y desde tablet se parte en dos columnas: si la imagen va a
+todo el ancho, el mensaje del operador y el botón de avance caen abajo del
+pliegue y el vendedor tiene que scrollear en medio de la reunión. Si agregás
+contenido a una escena, verificá que `document.documentElement.scrollHeight`
+siga igual a `window.innerHeight` en 1440x900.
+
+Una sola página que se acomoda a cualquier pantalla: no hay versión aparte para
+celular.
 
 ### El panel (`/panel`)
 
@@ -49,9 +73,9 @@ Se combinan: `?consorcio=Barrio Los Nogales&modo=auto`
 
 ## Imágenes de control de acceso
 
-La sección "El tótem también es la puerta" usa dos fotos de
-`public/accesos/`, retocadas para el mercado argentino (patente del Mercosur y
-carteles en castellano). Detalles en
+Las escenas 6 y 8 usan dos fotos de `public/accesos/`, retocadas para el
+mercado argentino (patente del Mercosur y carteles en castellano). La escena 7
+usa `public/cams/cam4.jpg`, la foto real del tótem en un lobby. Detalles en
 [`docs/imagenes-de-acceso.md`](docs/imagenes-de-acceso.md).
 
 ## Sonido
@@ -68,7 +92,7 @@ sintética: todo el argumento de venta es que del otro lado hay alguien. Ver
 frase igual se lee en pantalla y el resto del operativo suena normal.
 
 El navegador no deja sonar nada hasta que la persona toca algo, así que el audio
-se desbloquea con el botón "Empezar simulación". En modo automático aparece un
+se desbloquea con el botón "Ver demo". En modo automático aparece un
 botón "Activar sonido".
 
 > **En Zoom**, al compartir pantalla hay que tildar **"Compartir sonido"**. Si no,
@@ -76,9 +100,10 @@ botón "Activar sonido".
 
 ## El material de cámara
 
-Las cámaras 01, 02 y 03 usan video real generado en Flow; la 04 todavía usa una
-escena vectorial de respaldo. Los archivos y cómo se reemplazan están
-documentados en [`docs/material-de-camara.md`](docs/material-de-camara.md).
+Las cámaras 01, 02 y 03 usan video real generado en Flow; la 04 usa la foto real
+del tótem (`cam4.jpg`), que la escena 7 de la presentación reutiliza sin
+corrección nocturna. Los archivos y cómo se reemplazan están documentados en
+[`docs/material-de-camara.md`](docs/material-de-camara.md).
 
 Lo importante: **la Cam 03 sale de una sola toma continua**
 (`cam3.mp4`). Los tres estados —perímetro vacío, persona merodeando, persona
@@ -91,10 +116,15 @@ funcionando.
 
 ## Textos, tiempos y marca
 
-Todo lo editable está en [`lib/config.ts`](lib/config.ts): nombre del consorcio
-por defecto, zonas de las cámaras, confianza de la detección, minuta del
-operador línea por línea, tiempo de respuesta, contenido del reporte y duración
-de cada paso en modo automático.
+Los datos del sistema están en [`lib/config.ts`](lib/config.ts): nombre del
+consorcio por defecto, zonas de las cámaras, confianza de la detección, minuta
+del operador línea por línea, tiempo de respuesta y contenido del reporte.
+
+Los **textos de venta** de la presentación están arriba de cada componente, no en
+config: `BEATS`, `PASOS`, `CTA` y las duraciones `AUTO_MS` del modo automático en
+[`Presentation.tsx`](components/Presentation.tsx), y `DATA` en
+[`ProductScenes.tsx`](components/ProductScenes.tsx). Se editan ahí y son la
+copia fiel del guion aprobado: si cambia el guion, cambia ese bloque.
 
 Para usar el logo real: copiá el PNG a `public/vigia-logo.png` y poné
 `LOGO_SRC = "/vigia-logo.png"` en `lib/config.ts`.

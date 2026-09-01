@@ -5,11 +5,13 @@ import { LOGO_SRC } from "@/lib/config";
  * si no, dibuja un wordmark con el mismo criterio del sitio
  * (blanco + acento dorado en ".IA").
  */
-export default function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
+export default function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" | "xl" }) {
   const dims = {
     sm: { mark: 22, text: "text-[15px]", sub: "text-[7px]" },
     md: { mark: 30, text: "text-[21px]", sub: "text-[8px]" },
     lg: { mark: 42, text: "text-[30px]", sub: "text-[10px]" },
+    // Para la portada y el cierre, donde el guion pide la marca grande y al centro
+    xl: { mark: 64, text: "text-[clamp(34px,7vw,52px)]", sub: "text-[clamp(9px,1.3vw,12px)]" },
   }[size];
 
   if (LOGO_SRC) {
