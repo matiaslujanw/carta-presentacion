@@ -47,6 +47,13 @@ celular, un recorrido vertical. Las dos vistas consumen el mismo hook
 
 Se combinan: `?consorcio=Barrio Los Nogales&modo=auto`
 
+## Imágenes de control de acceso
+
+La sección "El tótem también es la puerta" usa dos fotos de
+`public/accesos/`, retocadas para el mercado argentino (patente del Mercosur y
+carteles en castellano). Detalles en
+[`docs/imagenes-de-acceso.md`](docs/imagenes-de-acceso.md).
+
 ## Sonido
 
 Los sonidos de máquina —la alarma de la analítica, el enganche del recuadro,

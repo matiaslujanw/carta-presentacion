@@ -590,6 +590,74 @@ export default function Presentation() {
             </div>
           </div>
 
+          {/* Lo que el consorcio usa todos los días */}
+          <div className="mt-10">
+            <p className="text-[12px] font-semibold tracking-[0.18em] text-goldhi uppercase">
+              Todos los días, no sólo de noche
+            </p>
+            <h3 className="mt-2 max-w-[20ch] text-[clamp(22px,3.8vw,34px)] leading-tight font-bold tracking-tight text-balance">
+              El tótem también es la puerta.
+            </h3>
+            <p className="mt-3 max-w-[58ch] text-[15px] leading-relaxed text-ink2">
+              La intrusión de la madrugada pasa una vez cada tanto. El control de accesos lo usa
+              cada vecino, todos los días, y es donde más se nota que el edificio está cuidado.
+            </p>
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <article className="overflow-hidden rounded-2xl border border-line bg-panel">
+                <div className="aspect-[16/10] w-full overflow-hidden bg-black">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/accesos/ingreso-peatonal.jpg"
+                    alt="Una vecina frente al tótem, que la reconoce y le abre la puerta"
+                    className="h-full w-full object-cover"
+                    style={{ objectPosition: "45% 52%" }}
+                    loading="lazy"
+                  />
+                </div>
+                <div className="p-5">
+                  <h4 className="text-[18px] leading-tight font-bold tracking-tight">
+                    El vecino entra con la cara
+                  </h4>
+                  <p className="mt-2 text-[14.5px] leading-relaxed text-ink2">
+                    Se para frente al tótem y la puerta se abre. Sin llave que se pierda, sin
+                    tarjeta que se preste y sin código que termine circulando por WhatsApp. Y queda
+                    registrado quién entró y a qué hora.
+                  </p>
+                </div>
+              </article>
+
+              <article className="overflow-hidden rounded-2xl border border-line bg-panel">
+                <div className="aspect-[16/10] w-full overflow-hidden bg-black">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/accesos/ingreso-vehicular.jpg"
+                    alt="Un auto en la entrada de la cochera: la cámara lee la patente y el portón se abre"
+                    className="h-full w-full object-cover"
+                    style={{ objectPosition: "48% 58%" }}
+                    loading="lazy"
+                  />
+                </div>
+                <div className="p-5">
+                  <h4 className="text-[18px] leading-tight font-bold tracking-tight">
+                    El portón lee la patente
+                  </h4>
+                  <p className="mt-2 text-[14.5px] leading-relaxed text-ink2">
+                    El auto llega, la cámara lee la patente y el portón se abre solo. Nadie baja la
+                    ventanilla de noche ni queda esperando en la vereda con el motor prendido, que
+                    es justo el momento en que a la gente la sorprenden.
+                  </p>
+                </div>
+              </article>
+            </div>
+
+            <p className="mt-4 max-w-[58ch] text-[13.5px] leading-relaxed text-muted">
+              Cada ingreso queda en el mismo registro que ve el administrador, junto a los eventos
+              de seguridad. Si mañana hay una discusión sobre quién entró a las 2 de la mañana, la
+              respuesta está ahí.
+            </p>
+          </div>
+
           {/* Cierre */}
           <div className="mt-10 rounded-2xl border border-gold/30 bg-golddim/25 p-7">
             <h3 className="max-w-[22ch] text-[clamp(21px,3.4vw,30px)] leading-tight font-bold tracking-tight text-balance">
