@@ -22,8 +22,13 @@ Abre en http://localhost:3000
 
 ### La presentación
 
-Sigue el guion aprobado escena por escena. Son once pantallas para nueve escenas
-numeradas: el reporte y el cierre no llevan número propio.
+Sigue el guion aprobado escena por escena: once pantallas para las nueve escenas
+del guion más el reporte y el cierre.
+
+**En pantalla no se numeran las escenas.** Los números de la tabla de abajo son
+para hablar entre nosotros y ubicarse en el guion; al cliente no se le muestra
+ni "Escena 7" ni un contador, porque le hace ver el andamiaje en vez de la
+presentación. El avance se indica sólo con la barrita del encabezado.
 
 | # | Escena | Qué se ve |
 |---|---|---|

@@ -69,21 +69,6 @@ const ORDER: Scene[] = [
   "cierre",
 ];
 
-/** Número de escena del guion. El reporte y el cierre no llevan número propio. */
-const SCENE_NUM: Record<Scene, string> = {
-  cover: "01",
-  deteccion: "02",
-  disuasion: "03",
-  despejado: "04",
-  pasos: "05",
-  reporte: "05",
-  accesos: "06",
-  totem: "07",
-  lpr: "08",
-  trazabilidad: "09",
-  cierre: "09",
-};
-
 /** Cuánto dura cada escena en modo automático, para el QR */
 const AUTO_MS: Record<Scene, number> = {
   cover: 5000,
@@ -433,18 +418,13 @@ export default function Presentation() {
         <span className="hidden sm:inline">{sound && audioUnlocked ? "Sonido" : "Activar sonido"}</span>
       </button>
 
-      {/* Avance del guion */}
-      <div className="flex shrink-0 items-center gap-2.5">
-        <div className="h-1 w-16 overflow-hidden rounded-full bg-line2 sm:w-28">
-          <div
-            className="h-full rounded-full bg-gold transition-[width] duration-500 ease-out"
-            style={{ width: `${Math.max(6, progress * 100)}%` }}
-          />
-        </div>
-        <span className="font-mono text-[11px] text-muted tabular-nums">
-          {SCENE_NUM[scene]}
-          <span className="text-faint"> / 09</span>
-        </span>
+      {/* Avance del guion. Sólo la barra: el número de escena es andamiaje
+          nuestro y no tiene por qué verlo el cliente. */}
+      <div className="h-1 w-16 shrink-0 overflow-hidden rounded-full bg-line2 sm:w-28">
+        <div
+          className="h-full rounded-full bg-gold transition-[width] duration-500 ease-out"
+          style={{ width: `${Math.max(6, progress * 100)}%` }}
+        />
       </div>
     </header>
   );
@@ -655,10 +635,7 @@ export default function Presentation() {
           {header}
 
           <div className="mx-auto w-full max-w-[1100px] px-4 pb-10 sm:px-8">
-            <p className="text-[12px] font-semibold tracking-[0.2em] text-goldhi uppercase">
-              Escena 5
-            </p>
-            <h2 className="mt-3 max-w-[18ch] text-[clamp(26px,5vw,44px)] leading-[1.05] font-bold tracking-tight text-balance uppercase">
+            <h2 className="mt-2 max-w-[18ch] text-[clamp(26px,5vw,44px)] leading-[1.05] font-bold tracking-tight text-balance uppercase">
               Paso a paso
             </h2>
             <p className="mt-3.5 max-w-[58ch] text-[clamp(15px,2.1vw,19px)] leading-relaxed text-ink2">
@@ -818,11 +795,6 @@ export default function Presentation() {
           <span className="rec-pulse h-1.5 w-1.5 rounded-full bg-gold" />
           <span className="text-[10px] font-semibold tracking-[0.16em] text-goldhi uppercase">
             Reproducción automática
-          </span>
-          {/* La misma numeración del encabezado: si acá dijera "4 / 11" y
-              arriba "03 / 09", el vecino no sabe cuál mirar. */}
-          <span className="ml-auto font-mono text-[10px] text-muted">
-            Escena {SCENE_NUM[scene]} / 09
           </span>
         </div>
       )}

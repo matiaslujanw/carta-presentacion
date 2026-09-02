@@ -157,8 +157,12 @@ function ArchiveGraphic() {
 /* ── Contenido de cada escena ─────────────────────────────────────────── */
 
 type SceneData = {
-  /** Número de escena del guion, para el rótulo */
-  eyebrow: string;
+  /**
+   * Rótulo chico arriba del título. Sólo lo llevan las escenas cuyo guion trae
+   * uno de verdad: no se numeran las escenas en pantalla, que le hace ver al
+   * cliente el andamiaje del guion en vez de la presentación.
+   */
+  eyebrow?: string;
   titulo: string;
   texto: string;
   /**
@@ -188,7 +192,6 @@ const DATA: Record<ProductSceneKey, SceneData> = {
     pie: "Sin llave que se pierda y sin tarjeta que se preste. Cada ingreso queda registrado con hora y persona.",
   },
   totem: {
-    eyebrow: "Escena 7",
     titulo: "Tótem IA",
     texto:
       "Traspasada la puerta principal de ingreso, el propietario y/o visitante se encontrará con el Tótem IA, con la imagen del operador de turno.",
@@ -212,14 +215,12 @@ const DATA: Record<ProductSceneKey, SceneData> = {
     ],
   },
   lpr: {
-    eyebrow: "Escena 8",
     titulo: "Acceso a cocheras mediante cámara LPR",
     texto:
       "Cuando el propietario gira hacia el ingreso de la cochera, la cámara LPR toma de forma inmediata el registro de la matrícula y acciona automáticamente el portón de acceso, permitiendo el ingreso en forma automática.",
     layout: "wide",
   },
   trazabilidad: {
-    eyebrow: "Escena 9",
     titulo: "Trazabilidad de registros",
     texto:
       "Toda la información registrada es archivada y resguardada en nuestro sistema por períodos establecidos por las partes según contrato y en cumplimiento a las normas legales vigentes.",
@@ -285,8 +286,17 @@ export default function ProductScene({ scene }: { scene: ProductSceneKey }) {
 
   const encabezado = (
     <>
-      <p className="text-[12px] font-semibold tracking-[0.2em] text-goldhi uppercase">{d.eyebrow}</p>
-      <h2 className="mt-3 text-[clamp(24px,4.6vw,40px)] leading-[1.08] font-bold tracking-tight text-balance uppercase">
+      {d.eyebrow && (
+        <p className="text-[12px] font-semibold tracking-[0.2em] text-goldhi uppercase">
+          {d.eyebrow}
+        </p>
+      )}
+      {/* Sin rótulo arriba, el título no necesita separación */}
+      <h2
+        className={`text-[clamp(24px,4.6vw,40px)] leading-[1.08] font-bold tracking-tight text-balance uppercase ${
+          d.eyebrow ? "mt-3" : ""
+        }`}
+      >
         {d.titulo}
       </h2>
       <p className="mt-4 max-w-[60ch] text-[clamp(15px,2.1vw,19px)] leading-relaxed text-ink2">
