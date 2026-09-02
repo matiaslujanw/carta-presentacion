@@ -201,11 +201,6 @@ const DATA: Record<ProductSceneKey, SceneData> = {
     layout: "tall",
     extras: [
       {
-        titulo: 'Pantalla de 47" con el operador de turno',
-        texto: "Del otro lado hay una persona, no un menú. Se le puede hablar.",
-        icon: "pantalla",
-      },
-      {
         titulo: "Todas las cámaras del consorcio",
         texto: "El tótem integra la totalidad de las cámaras que posea el edificio.",
         icon: "camaras",
@@ -228,7 +223,6 @@ const DATA: Record<ProductSceneKey, SceneData> = {
     texto:
       "Cuando el propietario gira hacia el ingreso de la cochera, la cámara LPR toma de forma inmediata el registro de la matrícula y acciona automáticamente el portón de acceso, permitiendo el ingreso en forma automática.",
     layout: "wide",
-    pie: "Nadie baja la ventanilla de noche ni queda esperando en la vereda con el motor prendido, que es justo el momento en que a la gente la sorprenden.",
   },
   trazabilidad: {
     eyebrow: "Escena 9",
@@ -248,7 +242,6 @@ const DATA: Record<ProductSceneKey, SceneData> = {
         icon: "reloj",
       },
     ],
-    pie: "Si mañana hay una discusión sobre quién entró a las dos de la mañana, la respuesta está ahí.",
   },
 };
 

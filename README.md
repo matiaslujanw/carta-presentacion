@@ -34,7 +34,7 @@ numeradas: el reporte y el cierre no llevan número propio.
 | 05 | Paso a paso | Las cuatro tarjetas 01→04 de cómo actúa la central. |
 | — | Reporte al administrador | Las capturas del antes y el después, más los datos del caso. |
 | 06 | Control de acceso biométrico | Rostro, palma y código numérico. |
-| 07 | Tótem IA | La pantalla de 47" con el operador, las cámaras del consorcio, los botones de pánico y las notificaciones del administrador. |
+| 07 | Tótem IA | El operador de turno en pantalla, las cámaras del consorcio, los botones de pánico y las notificaciones del administrador. |
 | 08 | Acceso a cocheras con cámara LPR | El portón lee la patente y se abre solo. |
 | 09 | Trazabilidad de registros | El registro del día, sellado, con el plazo de guarda por contrato. |
 | — | Cierre | "Tecnología de vanguardia para tu seguridad" y el relevamiento sin cargo. |
@@ -65,11 +65,11 @@ celular, un recorrido vertical. Las dos vistas consumen el mismo hook
 
 | Parámetro | Ejemplo | Para qué |
 |---|---|---|
-| `consorcio` | `?consorcio=Torres del Bosque` | Personaliza el nombre en toda la demo. Uno por cliente. |
+| `consorcio` | `?consorcio=Torres del Bosque` | Personaliza el nombre en `/panel`. La presentación ya no nombra al consorcio en ninguna pantalla. |
 | `modo` | `?modo=auto` | Corre sola, sin clics, y vuelve a empezar. Es el link del QR. |
 | `sello` | `?sello=off` | Oculta el sello "Simulación demostrativa". |
 
-Se combinan: `?consorcio=Barrio Los Nogales&modo=auto`
+Se combinan: `?modo=auto&sello=off`
 
 ## Imágenes de control de acceso
 

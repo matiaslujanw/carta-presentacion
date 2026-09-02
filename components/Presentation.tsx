@@ -20,7 +20,6 @@ import ProductScene, { type ProductSceneKey } from "./ProductScenes";
 import {
   BRAND,
   CAMERAS,
-  DEFAULT_CONSORCIO,
   DETECTION,
   EVENT_CAMERA,
   EVENT_TAKE,
@@ -207,7 +206,6 @@ function Waveform({ active }: { active: boolean }) {
 
 export default function Presentation() {
   const [scene, setScene] = useState<Scene>("cover");
-  const [consorcio, setConsorcio] = useState(DEFAULT_CONSORCIO);
   const [auto, setAuto] = useState(false);
   const [sello, setSello] = useState(true);
   const [confidence, setConfidence] = useState<number>(DETECTION.confidenceStart);
@@ -248,11 +246,11 @@ export default function Presentation() {
   const coverCam = CAMERAS.find((c) => c.id === 1)!;
   const topRef = useRef<HTMLDivElement>(null);
 
-  /* ── ?consorcio= · ?modo=auto · ?sello=off ── */
+  /* ── ?modo=auto · ?sello=off ──
+     El ?consorcio= sigue existiendo, pero sólo lo usa /panel: la presentación
+     ya no nombra al consorcio en ninguna pantalla. */
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
-    const c = q.get("consorcio");
-    if (c) setConsorcio(c.slice(0, 60));
     setAuto(q.get("modo") === "auto");
     setSello(q.get("sello") !== "off");
   }, []);
@@ -479,10 +477,7 @@ export default function Presentation() {
               {/* El guion pide la marca grande y al centro */}
               <Logo size="xl" />
 
-              <p className="mt-10 text-[12px] font-semibold tracking-[0.2em] text-goldhi uppercase">
-                Consorcio {consorcio}
-              </p>
-              <h1 className="mt-4 max-w-[22ch] text-[clamp(28px,6.6vw,54px)] leading-[1.06] font-bold tracking-tight text-balance uppercase">
+              <h1 className="mt-10 max-w-[22ch] text-[clamp(28px,6.6vw,54px)] leading-[1.06] font-bold tracking-tight text-balance uppercase">
                 Bienvenidos a la nueva era de la <span className="text-goldhi">seguridad</span>
               </h1>
               <p className="mt-5 max-w-[46ch] text-[clamp(16px,2.4vw,20px)] leading-relaxed text-ink2">
@@ -645,7 +640,7 @@ export default function Presentation() {
               vaya antes de intentar nada.
             </p>
 
-            <div className="mt-7 grid gap-3.5 sm:grid-cols-2">
+            <div className="mt-6 grid gap-3.5 sm:grid-cols-2">
               {PASOS.map((p) => (
                 <article
                   key={p.n}
@@ -750,10 +745,6 @@ export default function Presentation() {
               <h3 className="max-w-[26ch] mx-auto text-[clamp(19px,3.2vw,28px)] leading-tight font-bold tracking-tight text-balance uppercase">
                 Hacemos el relevamiento de tu edificio sin cargo
               </h3>
-              <p className="mt-3 text-[15px] leading-relaxed text-ink2">
-                Vamos al Consorcio {consorcio}, lo recorremos y les decimos exactamente dónde
-                conviene poner cada cámara y el tótem.
-              </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <a
                   href={`https://wa.me/${BRAND.phone.replace(/[^0-9]/g, "")}`}
