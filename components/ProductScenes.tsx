@@ -38,12 +38,6 @@ const ICONS = {
       <path d="M8.5 8h.01M12 8h.01M15.5 8h.01M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01" />
     </>
   ),
-  pantalla: (
-    <>
-      <rect x="2.5" y="4" width="19" height="13" rx="2" />
-      <path d="M8.5 20.5h7M12 17v3.5" />
-    </>
-  ),
   camaras: (
     <>
       <path d="M3 7.5 15.5 4.6l1.2 5.2L4.2 12.7Z" />
@@ -197,7 +191,7 @@ const DATA: Record<ProductSceneKey, SceneData> = {
     eyebrow: "Escena 7",
     titulo: "Tótem IA",
     texto:
-      "Traspasada la puerta principal de ingreso, el propietario y/o visitante se encontrará con el Tótem IA de 47\" con la imagen del operador de turno.",
+      "Traspasada la puerta principal de ingreso, el propietario y/o visitante se encontrará con el Tótem IA, con la imagen del operador de turno.",
     layout: "tall",
     extras: [
       {
