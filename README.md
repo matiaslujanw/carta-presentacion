@@ -95,6 +95,26 @@ El navegador no deja sonar nada hasta que la persona toca algo, así que el audi
 se desbloquea con el botón "Ver demo". En modo automático aparece un
 botón "Activar sonido".
 
+### En iPhone, el interruptor de silencio manda
+
+**Safari en iOS silencia el Web Audio cuando el teléfono está en silencio**, y
+todos los sonidos de la demo son Web Audio. Un `<audio>` común iniciado por un
+toque sí sonaría, pero acá no hay archivos: se sintetizan.
+
+O sea que el interruptor lateral del iPhone apaga exactamente los sonidos de la
+demo y nada más. **No hay forma de saltearlo por código**, así que la portada
+avisa cuando detecta un iOS. Si alguien reporta "en la compu suena y en el
+celular no", esto es lo primero que hay que preguntar.
+
+Por la misma razón `unlockAudio()` dispara un buffer mudo de un frame dentro
+del mismo toque ([`lib/sound.ts`](lib/sound.ts)): a Safari no le alcanza con
+`resume()` para dar el audio por desbloqueado.
+
+Y `resume()` es asincrónico, así que los sonidos se agendan recién cuando el
+contexto está `running` (la función `schedule`). Si se agendan antes, quedan
+apuntando a un reloj que todavía no avanza y, cuando arranca, ya pasó su
+horario: no suenan nunca. Esa carrera se perdía casi siempre en un celular.
+
 > **En Zoom**, al compartir pantalla hay que tildar **"Compartir sonido"**. Si no,
 > los vecinos ven la demo pero no escuchan nada.
 

@@ -34,11 +34,50 @@ function getCtx(): AudioContext | null {
 
 /**
  * Los navegadores sólo dejan sonar después de que la persona tocó algo.
- * Se llama desde el botón "Empezar simulación".
+ * Se llama desde el botón "Ver demo".
+ *
+ * A Safari en iPhone no le alcanza con resume(): hasta que no suena algo
+ * DENTRO del mismo toque, no considera el audio desbloqueado. Por eso se
+ * dispara un buffer mudo de un frame, que no se oye y sirve de llave.
  */
 export function unlockAudio() {
   const c = getCtx();
-  if (c && c.state === "suspended") void c.resume();
+  if (!c) return;
+  try {
+    const src = c.createBufferSource();
+    src.buffer = c.createBuffer(1, 1, c.sampleRate);
+    src.connect(c.destination);
+    src.start(0);
+  } catch {
+    // Si el navegador no deja, igual se intenta el resume de abajo
+  }
+  if (c.state === "suspended") void c.resume();
+}
+
+/**
+ * Corre `fn` con el contexto ya despierto.
+ *
+ * Importa el orden: resume() es asincrónico, y si se agendan los sonidos
+ * mientras el contexto todavía duerme, se agendan contra un reloj que no
+ * avanza. Cuando despierta ya pasó su horario y no suenan nunca. Esa carrera
+ * se pierde más seguido en un celular que en una computadora, así que acá se
+ * espera a que el contexto esté corriendo y sólo entonces se lee currentTime.
+ */
+function schedule(fn: (c: AudioContext) => void) {
+  const c = getCtx();
+  if (!c) return;
+  if (c.state === "running") {
+    fn(c);
+    return;
+  }
+  void c.resume().then(
+    () => {
+      if (c.state === "running") fn(c);
+    },
+    () => {
+      // Sin permiso del navegador no hay sonido, y no hay nada que hacer
+    },
+  );
 }
 
 type ToneOpts = {
@@ -50,9 +89,7 @@ type ToneOpts = {
   gain?: number;
 };
 
-function tone({ freq, at = 0, dur = 0.12, type = "square", gain = 1 }: ToneOpts) {
-  const c = getCtx();
-  if (!c) return;
+function tone(c: AudioContext, { freq, at = 0, dur = 0.12, type = "square", gain = 1 }: ToneOpts) {
   const t0 = c.currentTime + at;
   const osc = c.createOscillator();
   const amp = c.createGain();
@@ -76,9 +113,7 @@ function tone({ freq, at = 0, dur = 0.12, type = "square", gain = 1 }: ToneOpts)
 }
 
 /** Ráfaga de ruido: el "pff" de un altoparlante que se abre */
-function noise({ at = 0, dur = 0.18, gain = 0.5 }: { at?: number; dur?: number; gain?: number }) {
-  const c = getCtx();
-  if (!c) return;
+function noise(c: AudioContext, { at = 0, dur = 0.18, gain = 0.5 }: { at?: number; dur?: number; gain?: number }) {
   const t0 = c.currentTime + at;
   const frames = Math.floor(c.sampleRate * dur);
   const buf = c.createBuffer(1, frames, c.sampleRate);
@@ -103,35 +138,45 @@ function noise({ at = 0, dur = 0.18, gain = 0.5 }: { at?: number; dur?: number; 
 
 /** Alarma de la analítica: tres pulsos de dos tonos, como una central real */
 export function playAlarm() {
-  for (let i = 0; i < 3; i++) {
-    const base = i * 0.34;
-    tone({ freq: 932, at: base, dur: 0.13, type: "square", gain: 0.55 });
-    tone({ freq: 1245, at: base + 0.15, dur: 0.13, type: "square", gain: 0.55 });
-  }
+  schedule((c) => {
+    for (let i = 0; i < 3; i++) {
+      const base = i * 0.34;
+      tone(c, { freq: 932, at: base, dur: 0.13, type: "square", gain: 0.55 });
+      tone(c, { freq: 1245, at: base + 0.15, dur: 0.13, type: "square", gain: 0.55 });
+    }
+  });
 }
 
 /** El enganche del recuadro sobre el objetivo */
 export function playLock() {
-  tone({ freq: 1660, at: 0, dur: 0.05, type: "sine", gain: 0.5 });
-  tone({ freq: 2200, at: 0.06, dur: 0.07, type: "sine", gain: 0.4 });
+  schedule((c) => {
+    tone(c, { freq: 1660, at: 0, dur: 0.05, type: "sine", gain: 0.5 });
+    tone(c, { freq: 2200, at: 0.06, dur: 0.07, type: "sine", gain: 0.4 });
+  });
 }
 
 /** El altoparlante del tótem abriendo el canal */
 export function playPaOpen() {
-  tone({ freq: 220, at: 0, dur: 0.04, type: "triangle", gain: 0.7 });
-  noise({ at: 0.03, dur: 0.22, gain: 0.35 });
+  schedule((c) => {
+    tone(c, { freq: 220, at: 0, dur: 0.04, type: "triangle", gain: 0.7 });
+    noise(c, { at: 0.03, dur: 0.22, gain: 0.35 });
+  });
 }
 
 /** El altoparlante cerrando */
 export function playPaClose() {
-  noise({ at: 0, dur: 0.09, gain: 0.25 });
-  tone({ freq: 180, at: 0.05, dur: 0.05, type: "triangle", gain: 0.5 });
+  schedule((c) => {
+    noise(c, { at: 0, dur: 0.09, gain: 0.25 });
+    tone(c, { freq: 180, at: 0.05, dur: 0.05, type: "triangle", gain: 0.5 });
+  });
 }
 
 /** Incidente cerrado: dos notas que bajan, tranquilas */
 export function playResolve() {
-  tone({ freq: 784, at: 0, dur: 0.16, type: "sine", gain: 0.5 });
-  tone({ freq: 523, at: 0.18, dur: 0.3, type: "sine", gain: 0.45 });
+  schedule((c) => {
+    tone(c, { freq: 784, at: 0, dur: 0.16, type: "sine", gain: 0.5 });
+    tone(c, { freq: 523, at: 0.18, dur: 0.3, type: "sine", gain: 0.45 });
+  });
 }
 
 /**

@@ -218,6 +218,20 @@ export default function Presentation() {
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [isLocal, setIsLocal] = useState(false);
 
+  // Safari en iPhone silencia el Web Audio cuando el teléfono está en silencio,
+  // y toda la demo suena con Web Audio. No hay forma de saltearlo por código
+  // —el interruptor manda—, así que se avisa antes de arrancar: en una reunión
+  // no hay tiempo para descubrir por qué no se escucha nada.
+  const [isIOS, setIsIOS] = useState(false);
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    // iPadOS se reporta como Mac, se lo distingue por el táctil
+    setIsIOS(
+      /iP(hone|od|ad)/.test(ua) ||
+        (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1),
+    );
+  }, []);
+
   // La etiqueta larga de la IA ("CLASE: PERSONA · TRACK ID · Merodeo
   // sospechoso…") necesita unos 700 px de cuadro. Con menos se monta encima del
   // rótulo de la cámara, así que va en versión corta.
@@ -499,6 +513,19 @@ export default function Presentation() {
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </button>
+
+              {isIOS && (
+                <p className="mt-5 flex max-w-[34ch] items-start gap-2 text-[12.5px] leading-relaxed text-muted">
+                  <svg viewBox="0 0 24 24" className="mt-0.5 h-4 w-4 shrink-0 text-goldhi" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                    <path d="M4 9v6h3.5L12 18.5v-13L7.5 9H4Z" />
+                    <path d="m16.5 10 4 4m0-4-4 4" />
+                  </svg>
+                  <span>
+                    Si el iPhone está en silencio no vas a escuchar el operativo:
+                    sacalo de silencio con el interruptor lateral.
+                  </span>
+                </p>
+              )}
 
               {/* Atajo para el vendedor que ya mostró el caso y va al servicio */}
               <button
