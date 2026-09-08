@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * Escenas 6 a 9 del guion: lo que el consorcio usa todos los días.
+ * Escenas 2 a 5 del guion: lo que el consorcio usa todos los días.
  *
- * El caso de intrusión (escenas 1 a 5) es el gancho, pero el control de
- * accesos, el tótem del lobby y la trazabilidad son el servicio que el vecino
- * toca a diario. Por eso van como escenas propias, con el mismo peso que la
- * madrugada, y no apretadas al final de un scroll.
+ * El control de accesos, el tótem del lobby y la trazabilidad son el servicio
+ * que el vecino toca a diario. Por eso van antes del caso de intrusión y como
+ * escenas propias, con el mismo peso que la madrugada.
  *
  * Los textos salen del guion aprobado, casi literal. El chrome (logo, sonido,
  * progreso y el botón de avance) lo pone Presentation: acá va sólo el contenido

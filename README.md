@@ -33,19 +33,19 @@ presentación. El avance se indica sólo con la barrita del encabezado.
 | # | Escena | Qué se ve |
 |---|---|---|
 | 01 | Portada | La marca al centro, "Bienvenidos a la nueva era de la seguridad" y el botón **Ver demo**. |
-| 02 | La IA detecta | La Cam 03 con el recuadro sobre el sospechoso, 98% de confianza. |
-| 03 | Responde una persona | Los 3 segundos hasta que habla el operador por el altoparlante del tótem. |
-| 04 | Perímetro despejado | El sospechoso se retira y el cuadro queda vacío. |
-| 05 | Paso a paso | Las cuatro tarjetas 01→04 de cómo actúa la central. |
-| — | Reporte al administrador | Las capturas del antes y el después, más los datos del caso. |
-| 06 | Control de acceso biométrico | Rostro, palma y código numérico. |
-| 07 | Tótem IA | El operador de turno en pantalla, las cámaras del consorcio, los botones de pánico y las notificaciones del administrador. |
-| 08 | Acceso a cocheras con cámara LPR | El portón lee la patente y se abre solo. |
-| 09 | Trazabilidad de registros | El registro del día, sellado, con el plazo de guarda por contrato. |
-| — | Cierre | "Tecnología de vanguardia para tu seguridad" y el relevamiento sin cargo. |
+| 02 | Control de acceso biométrico | Rostro, palma y código numérico. |
+| 03 | Tótem IA | El operador de turno en pantalla, las cámaras del consorcio, los botones de pánico y las notificaciones del administrador. |
+| 04 | Acceso a cocheras con cámara LPR | El portón lee la patente y se abre solo. |
+| 05 | Trazabilidad de registros | El registro del día, sellado, con el plazo de guarda por contrato. |
+| 06 | La IA detecta | La Cam 03 con el recuadro sobre el sospechoso, 98% de confianza. |
+| 07 | Responde una persona | Los 3 segundos hasta que habla el operador por el altoparlante del tótem. |
+| 08 | Perímetro despejado | El sospechoso se retira y el cuadro queda vacío. |
+| 09 | Paso a paso | Las cuatro tarjetas 01→04 de cómo actúa la central. |
+| 10 | Reporte al administrador | Las capturas del antes y el después, más los datos del caso. |
+| 11 | Cierre | "Tecnología de vanguardia para tu seguridad" y el relevamiento sin cargo. |
 
-Las escenas 1 a 5 más el reporte viven en
-[`Presentation.tsx`](components/Presentation.tsx); las 6 a 9, en
+La portada, el caso de intrusión, el paso a paso, el reporte y el cierre viven en
+[`Presentation.tsx`](components/Presentation.tsx); las escenas 2 a 5, en
 [`ProductScenes.tsx`](components/ProductScenes.tsx). Los textos de venta están al
 principio de cada archivo, no repartidos por el JSX.
 

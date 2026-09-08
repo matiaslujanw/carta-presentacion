@@ -31,10 +31,10 @@ import {
 /**
  * Presentación de venta.
  *
- * Sigue el guion aprobado, escena por escena: la portada, el caso de intrusión
- * de la madrugada en tres momentos, el paso a paso de cómo actúa la central, el
- * reporte que le llega al administrador y las cuatro escenas del servicio de
- * todos los días (accesos, tótem, cocheras y trazabilidad).
+ * Sigue el guion aprobado, escena por escena: la portada, las cuatro escenas
+ * del servicio de todos los días (accesos, tótem, cocheras y trazabilidad), el
+ * caso de intrusión de la madrugada en tres momentos, el paso a paso de cómo
+ * actúa la central y el reporte que le llega al administrador.
  *
  * Sin barra de menú ni chrome de software: se avanza con un botón por escena,
  * así el vendedor maneja el ritmo desde el celular.
@@ -44,28 +44,28 @@ import {
 
 type Scene =
   | "cover" // Escena 1 — portada
-  | "deteccion" // Escena 2 — la IA detecta el merodeo
-  | "disuasion" // Escena 3 — el operador habla por el altoparlante
-  | "despejado" // Escena 4 — perímetro despejado
-  | "pasos" // Escena 5 — el paso a paso, 01 a 04
-  | "reporte" // Reporte al administrador
-  | "accesos" // Escena 6 — control de acceso biométrico
-  | "totem" // Escena 7 — Tótem IA
-  | "lpr" // Escena 8 — cocheras con cámara LPR
-  | "trazabilidad" // Escena 9 — trazabilidad de registros
-  | "cierre"; // Cierre — relevamiento sin cargo
+  | "accesos" // Escena 2 — control de acceso biométrico
+  | "totem" // Escena 3 — Tótem IA
+  | "lpr" // Escena 4 — cocheras con cámara LPR
+  | "trazabilidad" // Escena 5 — trazabilidad de registros
+  | "deteccion" // Escena 6 — la IA detecta el merodeo
+  | "disuasion" // Escena 7 — el operador habla por el altoparlante
+  | "despejado" // Escena 8 — perímetro despejado
+  | "pasos" // Escena 9 — el paso a paso, 01 a 04
+  | "reporte" // Escena 10 — reporte al administrador
+  | "cierre"; // Escena 11 — relevamiento sin cargo
 
 const ORDER: Scene[] = [
   "cover",
+  "accesos",
+  "totem",
+  "lpr",
+  "trazabilidad",
   "deteccion",
   "disuasion",
   "despejado",
   "pasos",
   "reporte",
-  "accesos",
-  "totem",
-  "lpr",
-  "trazabilidad",
   "cierre",
 ];
 
@@ -91,11 +91,11 @@ const CTA: Record<Scene, string> = {
   disuasion: "¿Qué hace el sospechoso?",
   despejado: "Paso a paso",
   pasos: "Reporte al administrador",
-  reporte: "Vigilancia 24/7",
+  reporte: "Cómo seguimos",
   accesos: "Tótem IA",
   totem: "Acceso a cocheras",
   lpr: "Trazabilidad de registros",
-  trazabilidad: "Cómo seguimos",
+  trazabilidad: "Ver caso de intrusión",
   cierre: "",
 };
 
@@ -484,7 +484,7 @@ export default function Presentation() {
               <button
                 onClick={() => {
                   enableAudio();
-                  go("deteccion");
+                  go("accesos");
                 }}
                 className="cta-glow mt-9 flex items-center justify-center gap-3 rounded-2xl bg-gold px-10 py-5 text-[18px] font-bold text-black transition-all hover:brightness-110"
               >
@@ -507,12 +507,12 @@ export default function Presentation() {
                 </p>
               )}
 
-              {/* Atajo para el vendedor que ya mostró el caso y va al servicio */}
+              {/* Atajo para el vendedor que quiere ir directo al caso de intrusión */}
               <button
-                onClick={() => go("accesos")}
+                onClick={() => go("deteccion")}
                 className="mt-5 text-[14px] font-semibold text-muted underline decoration-line2 underline-offset-4 transition-colors hover:text-ink2"
               >
-                Ir directo al servicio de todos los días
+                Ir directo al caso de intrusión
               </button>
             </div>
 
@@ -629,7 +629,7 @@ export default function Presentation() {
         </section>
       )}
 
-      {/* ══════════ ESCENA 5 · PASO A PASO ══════════ */}
+      {/* ══════════ ESCENA 9 · PASO A PASO ══════════ */}
       {scene === "pasos" && (
         <section className="flex min-h-[100dvh] flex-col">
           {header}
@@ -721,7 +721,7 @@ export default function Presentation() {
         </section>
       )}
 
-      {/* ══════════ ESCENAS 6 A 9 · EL SERVICIO DE TODOS LOS DÍAS ══════════ */}
+      {/* ══════════ ESCENAS 2 A 5 · EL SERVICIO DE TODOS LOS DÍAS ══════════ */}
       {isProduct && (
         <section className="flex min-h-[100dvh] flex-col">
           {header}
