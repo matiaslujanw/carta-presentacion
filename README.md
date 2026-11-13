@@ -18,6 +18,7 @@ Abre en http://localhost:3000
 | Ruta | Qué es |
 |---|---|
 | `/` | **La presentación de venta.** Las nueve escenas del guion, una por pantalla, con un botón para avanzar. Es lo que se manda por link o QR. |
+| `/experiencia` | **Nueva experiencia audiovisual.** Recorrido automático de siete escenas con locución, controles, subtítulos y animaciones sincronizadas. |
 | `/panel` | El panel completo de la central, con las cuatro cámaras y el recorrido de cuatro hojas. Para el cliente técnico que quiera ver el software. |
 
 ### La presentación

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   playAlarm,
@@ -446,6 +447,17 @@ export default function Presentation() {
                   <path d="M8 5v14l11-7z" />
                 </svg>
               </button>
+
+              <Link
+                href="/experiencia"
+                className="mt-4 flex items-center justify-center gap-3 rounded-2xl border border-gold/45 bg-gold/8 px-8 py-4 text-[16px] font-bold text-goldhi transition-all hover:border-gold/80 hover:bg-gold/14"
+              >
+                Ver experiencia audiovisual
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <path d="m10 9 5 3-5 3V9Z" fill="currentColor" stroke="none" />
+                </svg>
+              </Link>
 
               {isIOS && (
                 <p className="mt-5 flex max-w-[34ch] items-start gap-2 text-[12.5px] leading-relaxed text-muted">
