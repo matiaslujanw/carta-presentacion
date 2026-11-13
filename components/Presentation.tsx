@@ -150,20 +150,6 @@ export default function Presentation() {
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [isLocal, setIsLocal] = useState(false);
 
-  // Safari en iPhone silencia el Web Audio cuando el teléfono está en silencio,
-  // y toda la demo suena con Web Audio. No hay forma de saltearlo por código
-  // —el interruptor manda—, así que se avisa antes de arrancar: en una reunión
-  // no hay tiempo para descubrir por qué no se escucha nada.
-  const [isIOS, setIsIOS] = useState(false);
-  useEffect(() => {
-    const ua = navigator.userAgent;
-    // iPadOS se reporta como Mac, se lo distingue por el táctil
-    setIsIOS(
-      /iP(hone|od|ad)/.test(ua) ||
-        (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1),
-    );
-  }, []);
-
   // La etiqueta larga de la IA ("CLASE: PERSONA · TRACK ID · Merodeo
   // sospechoso…") necesita unos 700 px de cuadro. Con menos se monta encima del
   // rótulo de la cámara, así que va en versión corta.
@@ -429,61 +415,32 @@ export default function Presentation() {
                 Bienvenidos a la nueva era de la <span className="text-goldhi">seguridad</span>
               </h1>
               <p className="mt-5 max-w-[46ch] text-[clamp(16px,2.4vw,20px)] leading-relaxed text-ink2">
-                Servicio de Vigilancia Inteligente 24/7 para Consorcios.
+                Una experiencia audiovisual sobre la seguridad que detecta,
+                verifica y actúa a tiempo.
               </p>
               <p className="mt-3 max-w-[46ch] text-[clamp(14px,2vw,17px)] leading-relaxed text-muted">
-                Situación de caso de intrusión real a las 03:00 AM.
+                Accesos inteligentes, monitoreo con IA y respuesta humana.
               </p>
 
-              <button
-                onClick={() => {
-                  enableAudio();
-                  go("accesos");
-                }}
-                className="cta-glow mt-9 flex items-center justify-center gap-3 rounded-2xl bg-gold px-10 py-5 text-[18px] font-bold text-black transition-all hover:brightness-110"
-              >
-                Ver demo
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </button>
-
+              {/* La demo interactiva sigue implementada; la portada comercial
+                  concentra ahora el recorrido en una única experiencia. */}
               <Link
                 href="/experiencia"
-                className="mt-4 flex items-center justify-center gap-3 rounded-2xl border border-gold/45 bg-gold/8 px-8 py-4 text-[16px] font-bold text-goldhi transition-all hover:border-gold/80 hover:bg-gold/14"
+                className="cta-glow mt-9 flex items-center justify-center gap-3 rounded-2xl bg-gold px-10 py-5 text-[18px] font-bold text-black transition-all hover:-translate-y-0.5 hover:brightness-110"
               >
                 Ver experiencia audiovisual
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <rect x="3" y="5" width="18" height="14" rx="2" />
-                  <path d="m10 9 5 3-5 3V9Z" fill="currentColor" stroke="none" />
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5v14l11-7z" />
                 </svg>
               </Link>
 
-              {isIOS && (
-                <p className="mt-5 flex max-w-[34ch] items-start gap-2 text-[12.5px] leading-relaxed text-muted">
-                  <svg viewBox="0 0 24 24" className="mt-0.5 h-4 w-4 shrink-0 text-goldhi" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                    <path d="M4 9v6h3.5L12 18.5v-13L7.5 9H4Z" />
-                    <path d="m16.5 10 4 4m0-4-4 4" />
-                  </svg>
-                  <span>
-                    Si el iPhone está en silencio no vas a escuchar el operativo:
-                    sacalo de silencio con el interruptor lateral.
-                  </span>
-                </p>
-              )}
-
-              {/* Atajo para el vendedor que quiere ir directo al caso de intrusión */}
-              <button
-                onClick={() => go("deteccion")}
-                className="mt-5 text-[14px] font-semibold text-muted underline decoration-line2 underline-offset-4 transition-colors hover:text-ink2"
-              >
-                Ir directo al caso de intrusión
-              </button>
+              <p className="mt-4 text-[12px] font-medium tracking-[0.08em] text-muted uppercase">
+                1 minuto 40 segundos · Con voz y subtítulos
+              </p>
             </div>
 
             <p className="text-[12px] text-muted">
-              {sello && "Simulación demostrativa · "}
-              {BRAND.central}
+              Presentación comercial · {BRAND.central}
             </p>
           </div>
         </section>
