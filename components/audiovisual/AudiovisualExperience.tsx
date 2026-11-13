@@ -36,7 +36,7 @@ export default function AudiovisualExperience() {
           <p className={styles.eyebrow}>Seguridad con inteligencia</p>
           <h1>Una nueva forma de <span>cuidar lo que importa</span></h1>
           <p className={styles.gateCopy}>
-            Una experiencia audiovisual de 1 minuto 40 segundos sobre accesos inteligentes,
+            Una experiencia audiovisual de 1 minuto 48 segundos sobre accesos inteligentes,
             monitoreo con IA y respuesta humana.
           </p>
           <button type="button" onClick={start} className={styles.startButton}>

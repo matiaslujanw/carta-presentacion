@@ -1063,9 +1063,12 @@
 .closingContent > .eyebrow { margin-top: 1.5rem; }
 .closingContent h2 { max-width: 21ch; margin-top: .7rem; }
 .closingContent h2 span { color: var(--av-gold-hi); }
-.closingContent > p:not(.eyebrow) { margin: 1.2rem 0 0; color: #c1c4c9; font-size: clamp(.92rem,1.5vw,1.1rem); }
+.closingBenefit { display: flex; align-items: center; gap: .7rem; margin-top: 1.15rem; padding: .65rem .9rem; border: 1px solid rgba(212,161,58,.3); border-radius: .85rem; background: rgba(212,161,58,.07); }
+.closingBenefit strong { color: var(--av-gold-hi); font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; }
+.closingBenefit span { padding-left: .7rem; border-left: 1px solid rgba(212,161,58,.28); color: #b7bac0; font-size: .72rem; }
+.closingContent > .closingSurvey { margin: .9rem 0 0; color: #c1c4c9; font-size: clamp(.85rem,1.3vw,1rem); }
 
-.closingActions { display: flex; gap: .7rem; margin-top: 1.7rem; }
+.closingActions { display: flex; gap: .7rem; margin-top: 1.25rem; }
 .closingActions a { display: inline-flex; min-width: 190px; justify-content: center; padding: .9rem 1.2rem; border: 1px solid rgba(212,161,58,.45); border-radius: 999px; background: var(--av-gold); color: #080808; font-size: .85rem; font-weight: 800; text-decoration: none; transition: filter 160ms ease, transform 160ms ease; }
 .closingActions a:hover { filter: brightness(1.1); transform: translateY(-2px); }
 .closingActions .secondaryAction { background: rgba(255,255,255,.04); color: #e4e5e7; }
@@ -1173,6 +1176,9 @@
   .reportCard { display: none; }
   .eventRow { grid-template-columns: 54px 7px 1fr auto; margin-inline: .7rem; padding: .65rem 0; }
   .closingContent h2 { font-size: clamp(2rem, 10vw, 3rem); }
+  .closingBenefit { align-items: stretch; flex-direction: column; gap: .4rem; width: 100%; box-sizing: border-box; }
+  .closingBenefit strong { font-size: .7rem; }
+  .closingBenefit span { padding: .4rem 0 0; border-top: 1px solid rgba(212,161,58,.28); border-left: 0; font-size: .66rem; }
   .closingActions { width: 100%; flex-direction: column; }
   .closingActions a { width: 100%; box-sizing: border-box; }
   .contactLine { font-size: .6rem; }

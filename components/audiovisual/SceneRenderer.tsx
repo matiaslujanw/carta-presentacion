@@ -308,7 +308,11 @@ function ClosingScene() {
         <Logo size="xl" />
         <p className={styles.eyebrow}>Una solución integral</p>
         <h2>Tecnología que detecta.<br /><span>Personas que actúan.</span></h2>
-        <p>Hacemos el relevamiento de tu edificio sin cargo.</p>
+        <div className={styles.closingBenefit}>
+          <strong>Equipamiento sin costo</strong>
+          <span>En comodato · mantenimiento y actualización a cargo de Vig.IA</span>
+        </div>
+        <p className={styles.closingSurvey}>Hacemos el relevamiento de tu edificio sin cargo.</p>
         <div className={styles.closingActions}>
           <a href={`https://wa.me/${BRAND.phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer">
             Hablar por WhatsApp

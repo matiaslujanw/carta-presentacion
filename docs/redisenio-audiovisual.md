@@ -37,7 +37,7 @@ Versión funcional con locución para evaluación en la ruta `/experiencia`.
 
 - No se incorporó Framer Motion: las transiciones se resuelven con CSS para no aumentar el peso ni sumar una dependencia innecesaria.
 - El controlador de reproducción vive separado de las escenas.
-- La duración total es de aproximadamente 100 segundos.
+- La duración total es de aproximadamente 108 segundos.
 - La línea de tiempo funciona aun sin audio, usando el reloj del navegador.
 - Cuando exista una locución, el elemento `<audio>` pasa a ser el reloj de la escena y mantiene subtítulos y animaciones sincronizados.
 - Los controles incluyen reproducir, pausar, avanzar, retroceder, buscar, silenciar, volumen y subtítulos.
@@ -52,7 +52,7 @@ Versión funcional con locución para evaluación en la ruta `/experiencia`.
 | 04 | 17 s | Monitoreo IA | La analítica observa y genera alertas definidas. | Mosaico de cámaras y tracking del intruso. |
 | 05 | 18 s | Intervención | Un operador verifica y actúa en tres segundos. | Operador, audio disuasivo y respuesta. |
 | 06 | 14 s | Trazabilidad | Todo queda registrado y se informa. | Minuta, evidencias y reporte automático. |
-| 07 | 12 s | Cierre | Tecnología que detecta; personas que actúan. | Marca, CTA y datos de contacto. |
+| 07 | 21 s | Cierre | Tecnología que detecta; personas que actúan. Equipamiento sin costo en comodato, con mantenimiento y actualización. | Marca, beneficio comercial, CTA y datos de contacto. |
 
 El texto definitivo de la relatora y los subtítulos están centralizados en
 `lib/audiovisualContent.ts`.

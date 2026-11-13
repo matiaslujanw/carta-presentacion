@@ -435,7 +435,7 @@ export default function Presentation() {
               </Link>
 
               <p className="mt-4 text-[12px] font-medium tracking-[0.08em] text-muted uppercase">
-                1 minuto 40 segundos · Con voz y subtítulos
+                1 minuto 48 segundos · Con voz y subtítulos
               </p>
             </div>
 

@@ -41,7 +41,7 @@ const scenes = [
   {
     id: "07",
     file: "07-cierre.mp3",
-    text: "Vigía combina accesos inteligentes, monitoreo con inteligencia artificial y supervisión humana. Hacemos el relevamiento de tu edificio sin cargo. Conocé una forma más inteligente de cuidar lo que importa.",
+    text: "Vigía combina accesos inteligentes, monitoreo con inteligencia artificial y supervisión humana. Importante: Vigía entrega el equipamiento sin costo, en comodato. También se hace cargo del mantenimiento y la actualización. Hacemos el relevamiento de tu edificio sin cargo. Conocé una forma más inteligente de cuidar lo que importa.",
   },
 ];
 

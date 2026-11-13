@@ -173,18 +173,28 @@ export const AUDIOVISUAL_SCENES: AudiovisualScene[] = [
     navLabel: "Vig.IA",
     eyebrow: "Una solución integral",
     title: "Tecnología que detecta. Personas que actúan.",
-    duration: 13.01,
+    duration: 21.08,
     narration:
-      "Vig.IA combina accesos inteligentes, monitoreo con inteligencia artificial y supervisión humana. Hacemos el relevamiento de tu edificio sin cargo. Conocé una forma más inteligente de cuidar lo que importa.",
+      "Vig.IA combina accesos inteligentes, monitoreo con inteligencia artificial y supervisión humana. Importante: Vig.IA entrega el equipamiento sin costo, en comodato. También se hace cargo del mantenimiento y la actualización. Hacemos el relevamiento de tu edificio sin cargo. Conocé una forma más inteligente de cuidar lo que importa.",
     captions: [
       {
         start: 0,
-        end: 6.5,
+        end: 4.8,
         text: "Accesos inteligentes, monitoreo con IA y supervisión humana.",
       },
       {
-        start: 6.5,
-        end: 13.01,
+        start: 4.8,
+        end: 10,
+        text: "Vig.IA entrega el equipamiento sin costo, en comodato.",
+      },
+      {
+        start: 10,
+        end: 14.6,
+        text: "También se hace cargo del mantenimiento y la actualización.",
+      },
+      {
+        start: 14.6,
+        end: 21.08,
         text: "Hacemos el relevamiento de tu edificio sin cargo.",
       },
     ],
